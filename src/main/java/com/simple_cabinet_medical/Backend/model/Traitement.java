@@ -13,7 +13,7 @@ public class Traitement {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idTraitement;
 
     @OneToOne
     private Medicament medicament;
@@ -21,5 +21,6 @@ public class Traitement {
     @OneToOne
     private Posologie posologie;
 
+    private Long idUtilisateur;
 
 }

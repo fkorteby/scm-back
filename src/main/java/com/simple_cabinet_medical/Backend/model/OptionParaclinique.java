@@ -16,7 +16,10 @@ public class OptionParaclinique {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idOptionParaclinique;
 
     private String option;
+
+    private Long idUtilisateur;
+
 }

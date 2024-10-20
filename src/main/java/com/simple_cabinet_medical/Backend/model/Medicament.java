@@ -16,7 +16,7 @@ public class Medicament {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idMedicament;
 
     private String nomCommerciale;
 
@@ -27,4 +27,7 @@ public class Medicament {
     private String conditionnement;
 
     private String forme;
+
+    private Long idUtilisateur;
+
 }

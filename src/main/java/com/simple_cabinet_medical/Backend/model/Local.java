@@ -15,12 +15,14 @@ public class Local {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idLocal;
 
     private String adresse;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn (name = "local_id")
     private Set<Consultation> consultations;
+
+
 
 }

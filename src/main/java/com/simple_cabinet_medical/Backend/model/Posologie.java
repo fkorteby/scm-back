@@ -17,6 +17,10 @@ public class Posologie {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPosologie;
+
     private String posologie;
+
+    private Long idUtilisateur;
+
 }

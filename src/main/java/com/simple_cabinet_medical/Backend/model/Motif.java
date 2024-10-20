@@ -16,8 +16,11 @@ public class Motif {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idMotif;
 
     private String motif;
+
+    private Long idUtilisateur;
+
 
 }

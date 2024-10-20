@@ -16,7 +16,12 @@ public class Template {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idTemplate;
+
     private String nom;
+
     private String text;
+
+    private Long idUtilisateur;
+
 }

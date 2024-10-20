@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ public class Patient {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPatient;
 
     private String nom;
 
@@ -51,5 +52,9 @@ public class Patient {
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn (name = "patient_id")
     private Set<Document> documents;
+
+    private Long idUtilisateur;
+
+    private Date dateCreation;
 
 }

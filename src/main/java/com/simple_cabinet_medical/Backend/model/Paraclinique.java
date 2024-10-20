@@ -16,9 +16,12 @@ public class Paraclinique {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idParaclinique;
 
     private String examen;
 
     private String type;
+
+    private Long idUtilisateur;
+
 }
