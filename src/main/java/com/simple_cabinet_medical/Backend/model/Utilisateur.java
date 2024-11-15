@@ -1,9 +1,8 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.simple_cabinet_medical.Backend.service.UserDetailsServiceImpl;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,13 +13,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
-public class Utilisateur implements UserDetails {
+public class Utilisateur {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -34,21 +34,16 @@ public class Utilisateur implements UserDetails {
 
     private String role;
 
+    private String type;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection <GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role));
-        return authorities;
-    }
+    private String status;
 
-    @Override
-    public String getPassword() {
-        return mdp;
-    }
+    @ManyToOne
+    @JoinColumn(name="idClient")
+    @JsonIgnore
+    private Client client;
 
-    @Override
-    public String getUsername() {
-        return nomUtilisateur;
-    }
+    @OneToMany
+    private Set<Consultation> consultations;
+
 }

@@ -46,14 +46,16 @@ public class Patient {
     private String autres;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id")
+    //@JoinColumn(name = "patient_id")
     private List<Consultation> consultations;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "patient_id")
+    //@JoinColumn (name = "patient_id")
     private Set<Document> documents;
 
-    private Long idUtilisateur;
+
+    @ManyToOne()
+    private Utilisateur utilisateur;
 
     private Date dateCreation;
 

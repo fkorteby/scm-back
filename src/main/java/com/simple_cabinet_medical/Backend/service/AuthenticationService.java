@@ -7,6 +7,8 @@ import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,8 @@ public class AuthenticationService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    //@Autowired
+    //private AuthenticationManager authenticationManager;
 
 
     public Utilisateur signup(RegisterUserRequest input) {
@@ -36,7 +38,7 @@ public class AuthenticationService {
         return utilisateurRepository.save(user);
     }
 
-    public Utilisateur authenticate(LoginRequest input) {
+   /* public Utilisateur authenticate(LoginRequest input) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -47,5 +49,15 @@ public class AuthenticationService {
 
         return utilisateurRepository.findByNomUtilisateur(input.getNomUtilisateur())
                 .orElseThrow();
-    }
+    }*/
+
+   /* private void authenticate(String username, String password) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (DisabledException e) {
+            throw new Exception("USER_DISABLED", e);
+        } catch (BadCredentialsException e) {
+            throw new Exception("INVALID_CREDENTIALS", e);
+        }
+    }*/
 }

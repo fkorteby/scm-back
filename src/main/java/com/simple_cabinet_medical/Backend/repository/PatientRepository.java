@@ -27,7 +27,7 @@ public interface PatientRepository extends CrudRepository<Patient, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
-    
+
     List<Patient> findAll ();
 
     @Override

@@ -22,20 +22,20 @@ public class Client {
     private String nom;
 
     @OneToMany (cascade = CascadeType.ALL , fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
     private Set<Local> locals;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
     private Set<Utilisateur> utilisateurs;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
     private Set<Patient> patients;
+
+    private String status;
 
     private Long idUtilisateur;
 
     private Date dateCreation;
+
 
     public Client(Long id, String nom, Set<Local> locals, Set<Utilisateur> utilisateurs, Set<Patient> patients, Long idUtilisateur, Date dateCreation) {
         this.idClient = id;
@@ -49,8 +49,16 @@ public class Client {
 
     public Client () {}
 
-    public Long getId() {
+    public Long getIdClient() {
         return idClient;
+    }
+
+    public String getStatus () {
+        return this.status;
+    }
+
+    public void setStatus (String status) {
+        this.status = status;
     }
 
     public void setId(Long id) {

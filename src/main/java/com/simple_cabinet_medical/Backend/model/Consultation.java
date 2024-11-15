@@ -18,7 +18,7 @@ public class Consultation {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @NotNull
-    private Long idConsultation;
+    private Long consultationId;
 
     @NotNull
     private String motifConsultation;
@@ -36,10 +36,13 @@ public class Consultation {
     private String diagnosticMedical;
 
     @OneToOne (fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ordonnance_id")
     private Ordonnance ordonnance;
 
-    @NotNull
-    private Long idUtilisateur;
+
+    @ManyToOne()
+    //@JoinColumn(name = "utilisateur_id")
+    private Utilisateur utilisateur;
 
     @NotNull
     private Date dateCreation;

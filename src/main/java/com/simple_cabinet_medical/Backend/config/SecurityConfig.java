@@ -1,6 +1,7 @@
 package com.simple_cabinet_medical.Backend.config;
 
 
+
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
 import com.simple_cabinet_medical.Backend.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +9,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -63,13 +66,27 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+
+        CorsConfiguration cors = new CorsConfiguration().applyPermitDefaultValues();
+        cors.addAllowedMethod(HttpMethod.PUT);
+        cors.addAllowedMethod(HttpMethod.DELETE);
+        cors.addAllowedMethod(HttpMethod.OPTIONS);
+        cors.addAllowedMethod(HttpMethod.PATCH);
+
+        http.authorizeRequests(request -> request.requestMatchers("/auth/login", "/auth/signup").permitAll());
+
+        /*http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(request -> request.requestMatchers("/auth/**").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request.requestMatchers("/auth/login", "/auth/signup").permitAll().anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+*/
+        //http.authorizeHttpRequests(request ->request.requestMatchers("/auth/login", "/auth/signup").permitAll());
+       // http.authorizeHttpRequests(request ->request.requestMatchers("/auth/signup").permitAll());
+
+        //http.csrf(csrf -> csrf.disable());
         return http.build();
     }
 
