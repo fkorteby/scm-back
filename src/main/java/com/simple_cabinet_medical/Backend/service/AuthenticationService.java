@@ -4,7 +4,6 @@ import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.payload.request.LoginRequest;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

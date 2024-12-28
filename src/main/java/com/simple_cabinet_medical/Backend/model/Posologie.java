@@ -5,9 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 public class Posologie {
@@ -21,7 +18,6 @@ public class Posologie {
     private Long idUtilisateur;
 
     public Posologie() {}
-
 
     public Posologie(Long idPosologie, String posologie, Long idUtilisateur) {
         this.idPosologie = idPosologie;

@@ -4,14 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 public class Medicament {
 
     @Id
@@ -36,6 +31,64 @@ public class Medicament {
         this.dosage = dosage;
         this.conditionnement = conditionnement;
         this.forme = forme;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Medicament() {}
+
+    public Long getIdMedicament() {
+        return idMedicament;
+    }
+
+    public void setIdMedicament(Long idMedicament) {
+        this.idMedicament = idMedicament;
+    }
+
+    public String getNomCommerciale() {
+        return nomCommerciale;
+    }
+
+    public void setNomCommerciale(String nomCommerciale) {
+        this.nomCommerciale = nomCommerciale;
+    }
+
+    public String getDci() {
+        return dci;
+    }
+
+    public void setDci(String dci) {
+        this.dci = dci;
+    }
+
+    public String getDosage() {
+        return dosage;
+    }
+
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
+    }
+
+    public String getConditionnement() {
+        return conditionnement;
+    }
+
+    public void setConditionnement(String conditionnement) {
+        this.conditionnement = conditionnement;
+    }
+
+    public String getForme() {
+        return forme;
+    }
+
+    public void setForme(String forme) {
+        this.forme = forme;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
         this.idUtilisateur = idUtilisateur;
     }
 }

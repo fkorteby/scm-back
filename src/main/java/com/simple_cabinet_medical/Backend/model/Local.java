@@ -1,15 +1,9 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
 @Entity
 public class Local {
 
@@ -23,6 +17,29 @@ public class Local {
     @JoinColumn (name = "local_id")
     private Set<Consultation> consultations;
 
+    public Local() {}
 
+    public Long getIdLocal() {
+        return idLocal;
+    }
 
+    public void setIdLocal(Long idLocal) {
+        this.idLocal = idLocal;
+    }
+
+    public String getAdresse() {
+        return adresse;
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
+    }
+
+    public Set<Consultation> getConsultations() {
+        return consultations;
+    }
+
+    public void setConsultations(Set<Consultation> consultations) {
+        this.consultations = consultations;
+    }
 }

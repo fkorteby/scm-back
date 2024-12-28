@@ -5,14 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 public class Forme {
 
     @Id
@@ -34,4 +29,37 @@ public class Forme {
         this.idUtilisateur = idUtilisateur;
     }
 
+    public Forme() {}
+
+    public Long getIdForme() {
+        return idForme;
+    }
+
+    public void setIdForme(Long idForme) {
+        this.idForme = idForme;
+    }
+
+    public String getForme() {
+        return forme;
+    }
+
+    public void setForme(String forme) {
+        this.forme = forme;
+    }
+
+    public String getAbreviation() {
+        return abreviation;
+    }
+
+    public void setAbreviation(String abreviation) {
+        this.abreviation = abreviation;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }
