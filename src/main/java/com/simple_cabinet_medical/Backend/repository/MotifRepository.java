@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MotifRepository extends CrudRepository<Motif, Long> {
+public interface MotifRepository extends JpaRepository<Motif, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -35,5 +35,7 @@ public interface MotifRepository extends CrudRepository<Motif, Long> {
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<Motif> findAll ();
+
+    List<Motif> findAllByIdUtilisateur (Long id);
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ConduiteRepository extends CrudRepository<Conduite, Long> {
+public interface ConduiteRepository extends JpaRepository<Conduite, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -34,5 +34,7 @@ public interface ConduiteRepository extends CrudRepository<Conduite, Long> {
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<Conduite> findAll ();
+
+    List<Conduite> findAllByIdUtilisateur (Long id);
 
 }

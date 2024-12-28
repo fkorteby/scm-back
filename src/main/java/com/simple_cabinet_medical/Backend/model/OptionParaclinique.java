@@ -8,9 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
 @Entity
 public class OptionParaclinique {
 
@@ -22,4 +20,42 @@ public class OptionParaclinique {
 
     private Long idUtilisateur;
 
+    public OptionParaclinique(Long idOptionParaclinique, String option, Long idUtilisateur) {
+        this.idOptionParaclinique = idOptionParaclinique;
+        this.option = option;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public OptionParaclinique( String option, Long idUtilisateur) {
+        this.option = option;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+
+    public OptionParaclinique() {}
+
+
+    public Long getIdOptionParaclinique() {
+        return idOptionParaclinique;
+    }
+
+    public void setIdOptionParaclinique(Long idOptionParaclinique) {
+        this.idOptionParaclinique = idOptionParaclinique;
+    }
+
+    public String getOption() {
+        return option;
+    }
+
+    public void setOption(String option) {
+        this.option = option;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OptionParacliniqueRepository extends CrudRepository<OptionParaclinique, Long> {
+public interface OptionParacliniqueRepository extends JpaRepository<OptionParaclinique, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -35,4 +35,6 @@ public interface OptionParacliniqueRepository extends CrudRepository<OptionParac
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<OptionParaclinique> findAll ();
+
+    List<OptionParaclinique> findAllByIdUtilisateur (Long id);
 }

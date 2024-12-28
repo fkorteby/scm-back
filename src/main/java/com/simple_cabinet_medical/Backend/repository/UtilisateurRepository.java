@@ -15,20 +15,17 @@ import java.util.Optional;
 public interface UtilisateurRepository extends CrudRepository<Utilisateur, Long> {
 
     @Override
-    @PreAuthorize("hasAuthority('ADMIN')")
     Utilisateur save (Utilisateur utilisateur);
 
     @Override
-    @PreAuthorize("hasAuthority('ADMIN')")
     void deleteById (Long id);
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+
     Optional<Utilisateur> findByNomUtilisateur (String nomUtilisateur);
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+
     Optional<Utilisateur> findByNom (String nom);
 
     @Override
-    @PreAuthorize("hasAuthority('ADMIN')")
     List<Utilisateur> findAll ();
 }

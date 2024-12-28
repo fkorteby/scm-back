@@ -8,9 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
 @Entity
 public class Template {
 
@@ -24,4 +22,45 @@ public class Template {
 
     private Long idUtilisateur;
 
+    public Template(Long idTemplate, String nom, String text, Long idUtilisateur) {
+        this.idTemplate = idTemplate;
+        this.nom = nom;
+        this.text = text;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Template() {}
+
+
+    public Long getIdTemplate() {
+        return idTemplate;
+    }
+
+    public void setIdTemplate(Long idTemplate) {
+        this.idTemplate = idTemplate;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }

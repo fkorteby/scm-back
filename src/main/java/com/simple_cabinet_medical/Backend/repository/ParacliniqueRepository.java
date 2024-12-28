@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ParacliniqueRepository extends CrudRepository<Paraclinique, Long> {
+public interface ParacliniqueRepository extends JpaRepository<Paraclinique, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -36,4 +36,5 @@ public interface ParacliniqueRepository extends CrudRepository<Paraclinique, Lon
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<Paraclinique> findAll ();
 
+    List<Paraclinique> findAllByIdUtilisateur (Long id);
 }

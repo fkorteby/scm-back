@@ -10,9 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 public class Posologie {
 
     @Id
@@ -23,4 +20,42 @@ public class Posologie {
 
     private Long idUtilisateur;
 
+    public Posologie() {}
+
+
+    public Posologie(Long idPosologie, String posologie, Long idUtilisateur) {
+        this.idPosologie = idPosologie;
+        this.posologie = posologie;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Posologie(String posologie, Long idUtilisateur) {
+        this.posologie = posologie;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+
+    public Long getIdPosologie() {
+        return idPosologie;
+    }
+
+    public void setIdPosologie(Long idPosologie) {
+        this.idPosologie = idPosologie;
+    }
+
+    public String getPosologie() {
+        return posologie;
+    }
+
+    public void setPosologie(String posologie) {
+        this.posologie = posologie;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }

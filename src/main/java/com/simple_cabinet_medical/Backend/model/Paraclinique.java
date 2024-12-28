@@ -8,9 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
 @Entity
 public class Paraclinique {
 
@@ -24,4 +22,52 @@ public class Paraclinique {
 
     private Long idUtilisateur;
 
+
+    public Paraclinique(Long idParaclinique, String examen, String type, Long idUtilisateur) {
+        this.idParaclinique = idParaclinique;
+        this.examen = examen;
+        this.type = type;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Paraclinique(String examen, String type, Long idUtilisateur) {
+        this.examen = examen;
+        this.type = type;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Paraclinique() {}
+
+
+    public Long getIdParaclinique() {
+        return idParaclinique;
+    }
+
+    public void setIdParaclinique(Long idParaclinique) {
+        this.idParaclinique = idParaclinique;
+    }
+
+    public String getExamen() {
+        return examen;
+    }
+
+    public void setExamen(String examen) {
+        this.examen = examen;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }

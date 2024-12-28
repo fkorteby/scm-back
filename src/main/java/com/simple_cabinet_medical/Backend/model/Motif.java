@@ -9,9 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+
 public class Motif {
 
     @Id
@@ -23,4 +21,42 @@ public class Motif {
     private Long idUtilisateur;
 
 
+    public Motif() {}
+
+
+    public Motif(Long idMotif, String motif, Long idUtilisateur) {
+        this.idMotif = idMotif;
+        this.motif = motif;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+    public Motif(String motif, Long idUtilisateur) {
+        this.motif = motif;
+        this.idUtilisateur = idUtilisateur;
+    }
+
+
+    public Long getIdMotif() {
+        return idMotif;
+    }
+
+    public void setIdMotif(Long idMotif) {
+        this.idMotif = idMotif;
+    }
+
+    public String getMotif() {
+        return motif;
+    }
+
+    public void setMotif(String motif) {
+        this.motif = motif;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
+    }
 }

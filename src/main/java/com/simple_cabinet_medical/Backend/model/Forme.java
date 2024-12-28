@@ -28,4 +28,10 @@ public class Forme {
     @NotNull
     private Long idUtilisateur;
 
+    public Forme (String forme, String abreviation, Long idUtilisateur) {
+        this.forme = forme;
+        this.abreviation = abreviation;
+        this.idUtilisateur = idUtilisateur;
+    }
+
 }

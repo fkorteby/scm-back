@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FormeRepository extends CrudRepository<Forme, Long> {
+public interface FormeRepository extends JpaRepository<Forme, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -35,4 +35,6 @@ public interface FormeRepository extends CrudRepository<Forme, Long> {
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<Forme> findAll ();
+
+    List<Forme> findAllByIdUtilisateur (Long idUtilisateur);
 }

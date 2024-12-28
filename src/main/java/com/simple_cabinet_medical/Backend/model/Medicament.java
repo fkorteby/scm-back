@@ -30,4 +30,12 @@ public class Medicament {
 
     private Long idUtilisateur;
 
+    public Medicament(String nomCommerciale, String dci, String dosage, String conditionnement, String forme, Long idUtilisateur) {
+        this.nomCommerciale = nomCommerciale;
+        this.dci = dci;
+        this.dosage = dosage;
+        this.conditionnement = conditionnement;
+        this.forme = forme;
+        this.idUtilisateur = idUtilisateur;
+    }
 }

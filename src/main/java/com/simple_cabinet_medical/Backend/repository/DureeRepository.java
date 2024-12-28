@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DureeRepository extends CrudRepository<Duree, Long> {
+public interface DureeRepository extends JpaRepository<Duree, Long> {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
@@ -35,5 +35,7 @@ public interface DureeRepository extends CrudRepository<Duree, Long> {
     @Override
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
     List<Duree> findAll ();
+
+    List<Duree> findAllByIdUtilisateur (Long id);
 
 }
