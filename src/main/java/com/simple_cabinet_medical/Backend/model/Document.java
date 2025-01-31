@@ -4,27 +4,51 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
+
 import java.util.Date;
 
 
 @Entity
-public class Document {
+public class Document extends BasedObject{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
     private Long idDocument;
 
-    @NotNull
     private String nomDocument;
 
-    @NotNull
     private String text;
 
-    @NotNull
-    private Long idUtilisateur;
+    public Document() {}
 
-    @NotNull
-    private Date dateCreation;
+    public Document(Long idDocument, String nomDocument, String text) {
+        this.idDocument = idDocument;
+        this.nomDocument = nomDocument;
+        this.text = text;
+    }
+
+    public Long getIdDocument() {
+        return idDocument;
+    }
+
+    public void setIdDocument(Long idDocument) {
+        this.idDocument = idDocument;
+    }
+
+    public String getNomDocument() {
+        return nomDocument;
+    }
+
+    public void setNomDocument(String nomDocument) {
+        this.nomDocument = nomDocument;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
 }

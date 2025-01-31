@@ -16,8 +16,8 @@ public class PosologieController {
     }
 
     @GetMapping("/posologies")
-    public ResponseEntity<?> getAll () {
-        return posologieService.getAll();
+    public ResponseEntity<?> getAll (@RequestParam Long idUtilisateur) {
+        return posologieService.getAll(idUtilisateur);
     }
 
     @GetMapping("/posologies/{idUtilisateur}")
@@ -31,8 +31,8 @@ public class PosologieController {
     }
 
     @DeleteMapping("/posologies/{idPosologie}")
-    public ResponseEntity<?> deletePosologie (@PathVariable Long idPosologie) {
-        return posologieService.delete(idPosologie);
+    public ResponseEntity<?> deletePosologie (@PathVariable Long idPosologie, @RequestParam Long idUtilisateur) {
+        return posologieService.delete(idPosologie, idUtilisateur);
     }
 
     @PutMapping("/posologies/{idPosologie}")

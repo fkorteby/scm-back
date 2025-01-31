@@ -1,5 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
+import com.simple_cabinet_medical.Backend.model.EROLE;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.payload.request.LoginRequest;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
@@ -30,7 +31,7 @@ public class AuthenticationService {
         user.setNom(input.getNom());
         user.setNomUtilisateur(input.getNomUtilisateur());
         user.setMdp(passwordEncoder.encode(input.getMdp()));
-        user.setRole(input.getRole());
+        user.setRole(EROLE.valueOf(input.getRole()));
 
         return utilisateurRepository.save(user);
     }

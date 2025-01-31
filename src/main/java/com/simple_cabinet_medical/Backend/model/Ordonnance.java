@@ -6,7 +6,7 @@ import java.util.Set;
 
 
 @Entity
-public class Ordonnance {
+public class Ordonnance extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -18,12 +18,6 @@ public class Ordonnance {
     @OneToMany ( cascade = CascadeType.ALL  ,fetch = FetchType.LAZY)
     @JoinColumn (name = "ordonnace_id")
     private Set<Traitement> traitements;
-
-    private Long idUtilisateur;
-
-    private Date dateCreation;
-
-    private Date dateModification;
 
     public Ordonnance() {}
 
@@ -51,27 +45,4 @@ public class Ordonnance {
         this.traitements = traitements;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
-
-    public Date getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(Date dateCreation) {
-        this.dateCreation = dateCreation;
-    }
-
-    public Date getDateModification() {
-        return dateModification;
-    }
-
-    public void setDateModification(Date dateModification) {
-        this.dateModification = dateModification;
-    }
 }

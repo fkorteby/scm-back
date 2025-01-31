@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 
 @Entity
-public class Traitement {
+public class Traitement extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -15,8 +15,6 @@ public class Traitement {
 
     @OneToOne
     private Posologie posologie;
-
-    private Long idUtilisateur;
 
     public Traitement() {}
 
@@ -44,11 +42,4 @@ public class Traitement {
         this.posologie = posologie;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }

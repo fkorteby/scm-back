@@ -22,8 +22,8 @@ public class MedicamentController {
     }
 
     @GetMapping("/medicaments")
-    public ResponseEntity<?> getAllMedicamant () {
-        return medicamentService.getAllMedicament();
+    public ResponseEntity<?> getAllMedicamant (@RequestParam Long idUtilisateur) {
+        return medicamentService.getAllMedicament(idUtilisateur);
     }
 
     @GetMapping("/medicaments/{idUtilisateur}")
@@ -37,7 +37,7 @@ public class MedicamentController {
     }
 
     @DeleteMapping("/medicaments/{idMedicament}")
-    public ResponseEntity<?> deleteMedicament (@PathVariable Long idMedicament) {
-        return medicamentService.deleteMedicament(idMedicament);
+    public ResponseEntity<?> deleteMedicament (@PathVariable Long idMedicament, @RequestParam Long idUtilisateur) {
+        return medicamentService.deleteMedicament(idMedicament, idUtilisateur);
     }
 }

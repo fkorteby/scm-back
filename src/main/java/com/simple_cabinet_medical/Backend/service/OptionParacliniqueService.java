@@ -1,5 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
+import com.simple_cabinet_medical.Backend.model.EAccessLevel;
 import com.simple_cabinet_medical.Backend.model.Motif;
 import com.simple_cabinet_medical.Backend.model.OptionParaclinique;
 import com.simple_cabinet_medical.Backend.payload.request.AddParametreRequest;
@@ -16,49 +17,71 @@ public class OptionParacliniqueService {
 
     private final OptionParacliniqueRepository optionParacliniqueRepository;
 
-    public OptionParacliniqueService(OptionParacliniqueRepository optionParacliniqueRepository) {
+    private final AccessControlService accessControlService;
+
+    public OptionParacliniqueService(OptionParacliniqueRepository optionParacliniqueRepository, AccessControlService accessControlService) {
         this.optionParacliniqueRepository = optionParacliniqueRepository;
+        this.accessControlService = accessControlService;
     }
 
     public ResponseEntity<?> add (AddParametreRequest data) {
-        if (optionParacliniqueRepository.findByOption(data.getParametre()).isPresent()) {
-            return ResponseHandler.generateResponse("", HttpStatus.CONFLICT, null);
+        if (accessControlService.hasAccess(new OptionParaclinique(), data.getIdUtilisateur(), EAccessLevel.WRITE)) {
+            if (optionParacliniqueRepository.findByOption(data.getParametre()).isPresent()) {
+                return ResponseHandler.generateResponse("", HttpStatus.CONFLICT, null);
+            } else {
+                OptionParaclinique option = new OptionParaclinique(data.getParametre(), data.getIdUtilisateur());
+                option = optionParacliniqueRepository.save(option);
+                return ResponseHandler.generateResponse("",HttpStatus.CREATED, option);
+            }
         } else {
-            OptionParaclinique option = new OptionParaclinique(data.getParametre(), data.getIdUtilisateur());
-            option = optionParacliniqueRepository.save(option);
-            return ResponseHandler.generateResponse("",HttpStatus.CREATED, option);
+            return ResponseHandler.generateResponse("Accès refusé. Veuillez contacter l'administrateur.", HttpStatus.FORBIDDEN, null);
         }
     }
 
     public ResponseEntity<?> update (AddParametreRequest data, Long id) {
-        if (optionParacliniqueRepository.findById(id).isPresent()) {
-            OptionParaclinique option = optionParacliniqueRepository.findById(id).get();
-            option.setOption(data.getParametre());
-            option = optionParacliniqueRepository.save(option);
-            return ResponseHandler.generateResponse("", HttpStatus.OK, option);
-        } else {
+        if (accessControlService.hasAccess(new OptionParaclinique(), data.getIdUtilisateur(), EAccessLevel.UPDATE)) {
+            if (optionParacliniqueRepository.findById(id).isPresent()) {
+                OptionParaclinique option = optionParacliniqueRepository.findById(id).get();
+                option.setOption(data.getParametre());
+                option = optionParacliniqueRepository.save(option);
+                return ResponseHandler.generateResponse("", HttpStatus.OK, option);
+            } else {
 
-            return ResponseHandler.generateResponse("",HttpStatus.NOT_FOUND, null);
+                return ResponseHandler.generateResponse("",HttpStatus.NOT_FOUND, null);
+            }
+        } else {
+            return ResponseHandler.generateResponse("Accès refusé. Veuillez contacter l'administrateur.", HttpStatus.FORBIDDEN, null);
         }
     }
 
-    public ResponseEntity<?> delete (Long id) {
-        if (optionParacliniqueRepository.findById(id).isPresent()) {
-            optionParacliniqueRepository.deleteById(id);
-            return ResponseHandler.generateResponse("", HttpStatus.OK, null);
+    public ResponseEntity<?> delete (Long id, Long idUtilisateur) {
+        if (accessControlService.hasAccess(new OptionParaclinique(), idUtilisateur, EAccessLevel.DELETE)) {
+            if (optionParacliniqueRepository.findById(id).isPresent()) {
+                optionParacliniqueRepository.deleteById(id);
+                return ResponseHandler.generateResponse("", HttpStatus.OK, null);
+            } else {
+                return ResponseHandler.generateResponse("",HttpStatus.NOT_FOUND, null);
+            }
         } else {
-
-            return ResponseHandler.generateResponse("",HttpStatus.NOT_FOUND, null);
+            return ResponseHandler.generateResponse("Accès refusé. Veuillez contacter l'administrateur.", HttpStatus.FORBIDDEN, null);
         }
     }
 
-    public ResponseEntity<?> getAll () {
-        List<OptionParaclinique> list = optionParacliniqueRepository.findAll();
-        return ResponseHandler.generateResponse("", HttpStatus.OK, list);
+    public ResponseEntity<?> getAll (Long idUtilisateur) {
+        if (accessControlService.hasAccess(new OptionParaclinique(), idUtilisateur, EAccessLevel.READ)) {
+            List<OptionParaclinique> list = optionParacliniqueRepository.findAll();
+            return ResponseHandler.generateResponse("", HttpStatus.OK, list);
+        } else {
+            return ResponseHandler.generateResponse("Accès refusé. Veuillez contacter l'administrateur.", HttpStatus.FORBIDDEN, null);
+        }
     }
 
     public ResponseEntity<?> getAllByIdUtilisateur (Long id) {
-        List<OptionParaclinique> list = optionParacliniqueRepository.findAllByIdUtilisateur(id);
-        return ResponseHandler.generateResponse("", HttpStatus.OK, list);
+        if (accessControlService.hasAccess(new OptionParaclinique(), id, EAccessLevel.READ)) {
+            List<OptionParaclinique> list = optionParacliniqueRepository.findAllByIdUtilisateur(id);
+            return ResponseHandler.generateResponse("", HttpStatus.OK, list);
+        } else {
+            return ResponseHandler.generateResponse("Accès refusé. Veuillez contacter l'administrateur.", HttpStatus.FORBIDDEN, null);
+        }
     }
 }

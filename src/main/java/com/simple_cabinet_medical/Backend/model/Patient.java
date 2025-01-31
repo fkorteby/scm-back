@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-public class Patient {
+public class Patient extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -45,10 +45,6 @@ public class Patient {
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn (name = "patient_id")
     private Set<Document> documents;
-
-    private Long idUtilisateur;
-
-    private Date dateCreation;
 
     public Patient() {}
 
@@ -180,19 +176,4 @@ public class Patient {
         this.documents = documents;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
-
-    public Date getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(Date dateCreation) {
-        this.dateCreation = dateCreation;
-    }
 }

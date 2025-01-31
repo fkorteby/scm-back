@@ -1,11 +1,13 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
+
+import java.util.Date;
 import java.util.Set;
 
 
 @Entity
-public class Local {
+public class Local extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -42,4 +44,5 @@ public class Local {
     public void setConsultations(Set<Consultation> consultations) {
         this.consultations = consultations;
     }
+
 }

@@ -12,6 +12,4 @@ import java.util.List;
 @Repository
 public interface ConsultationRepository extends CrudRepository<Consultation, Long> {
 
-
-
 }

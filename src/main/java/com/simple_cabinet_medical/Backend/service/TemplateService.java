@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 public class TemplateService {
 
     private final TemplateRepository templateRepository;
+    private final AccessControlService accessControlService;
 
-    public TemplateService(TemplateRepository templateRepository) {
+    public TemplateService(TemplateRepository templateRepository, AccessControlService accessControlService) {
         this.templateRepository = templateRepository;
+        this.accessControlService = accessControlService;
     }
 
     public void addTemplate () {}

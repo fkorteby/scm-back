@@ -2,6 +2,7 @@ package com.simple_cabinet_medical.Backend.payload.request;
 
 public class AddPatientRequest {
 
+    private Long idUtilisateur;
     private String nom;
     private String prenom;
     private int age;
@@ -10,7 +11,6 @@ public class AddPatientRequest {
     private String sexe;
     private String situationFamiliale;
     private String profession;
-
     private Boolean isAssure;
     private String adresse;
     private String antecedentsPersonnelsMedicaux;
@@ -19,23 +19,6 @@ public class AddPatientRequest {
     private String autres;
 
     public AddPatientRequest() {}
-
-    public AddPatientRequest(String nom, String prenom, int age, String dateNaissance, String telephone, String sexe, String situationFamiliale, String profession, Boolean isAssure, String adresse, String antecedentsPersonnelsMedicaux, String antecedentsPersonnelsChirugicaux, String antecedentsFamiliaux, String autres) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.age = age;
-        this.dateNaissance = dateNaissance;
-        this.telephone = telephone;
-        this.sexe = sexe;
-        this.situationFamiliale = situationFamiliale;
-        this.profession = profession;
-        this.isAssure = isAssure;
-        this.adresse = adresse;
-        this.antecedentsPersonnelsMedicaux = antecedentsPersonnelsMedicaux;
-        this.antecedentsPersonnelsChirugicaux = antecedentsPersonnelsChirugicaux;
-        this.antecedentsFamiliaux = antecedentsFamiliaux;
-        this.autres = autres;
-    }
 
     public String getNom() {
         return nom;
@@ -147,5 +130,13 @@ public class AddPatientRequest {
 
     public void setAutres(String autres) {
         this.autres = autres;
+    }
+
+    public Long getIdUtilisateur() {
+        return idUtilisateur;
+    }
+
+    public void setIdUtilisateur(Long idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
     }
 }

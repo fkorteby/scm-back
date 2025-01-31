@@ -41,7 +41,7 @@ public class AuthenticationController {
         loginResponse.setNomUtilisateur(authenticatedUser.getNomUtilisateur());
         loginResponse.setId(authenticatedUser.getIdUtilisateur());
         loginResponse.setToken(jwtToken);
-        loginResponse.setRole(authenticatedUser.getRole());
+        loginResponse.setRole(authenticatedUser.getRole().toString());
         return ResponseEntity.ok(loginResponse);
     }
 

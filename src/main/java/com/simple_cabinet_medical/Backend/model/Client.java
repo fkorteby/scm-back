@@ -7,31 +7,26 @@ import java.util.Set;
 
 
 @Entity
-public class Client {
+public class Client extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    @NotNull
     private Long idClient;
 
-    @NotNull
     private String nom;
 
     @OneToMany (cascade = CascadeType.ALL , fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
+    @JoinColumn (name = "idClient")
     private Set<Local> locals;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
+    @JoinColumn (name = "idClient")
     private Set<Utilisateur> utilisateurs;
 
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn (name = "client_id")
     private Set<Patient> patients;
 
-    private Long idUtilisateur;
-
-    private Date dateCreation;
 
     public Client(Long id, String nom, Set<Local> locals, Set<Utilisateur> utilisateurs, Set<Patient> patients, Long idUtilisateur, Date dateCreation) {
         this.idClient = id;
@@ -45,11 +40,11 @@ public class Client {
 
     public Client () {}
 
-    public Long getId() {
+    public Long getIdClient() {
         return idClient;
     }
 
-    public void setId(Long id) {
+    public void setIdClient(Long id) {
         this.idClient = id;
     }
 
@@ -85,19 +80,4 @@ public class Client {
         this.patients = patients;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
-
-    public Date getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(Date dateCreation) {
-        this.dateCreation = dateCreation;
-    }
 }

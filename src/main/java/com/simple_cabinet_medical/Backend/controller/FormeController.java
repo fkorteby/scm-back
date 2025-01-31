@@ -23,8 +23,8 @@ public class FormeController {
     }
 
     @GetMapping("/formes")
-    public ResponseEntity<?> getAllForme () {
-        return formeService.getAllForme();
+    public ResponseEntity<?> getAllForme (@RequestParam Long idUtilisateur) {
+        return formeService.getAllForme(idUtilisateur);
     }
 
     @GetMapping("/formes/{idUtilisateur}")
@@ -33,8 +33,8 @@ public class FormeController {
     }
 
     @DeleteMapping("/formes/{idForme}")
-    public ResponseEntity<?> deleteForme (@PathVariable Long idForme) {
-        return formeService.deleteForme(idForme);
+    public ResponseEntity<?> deleteForme (@PathVariable Long idForme, @RequestParam Long idUtilisateur) {
+        return formeService.deleteForme(idForme, idUtilisateur);
     }
 
     @PutMapping("/formes/{idForme}")

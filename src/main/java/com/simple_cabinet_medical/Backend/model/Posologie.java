@@ -7,15 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Posologie {
+public class Posologie extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long idPosologie;
 
     private String posologie;
-
-    private Long idUtilisateur;
 
     public Posologie() {}
 
@@ -47,11 +45,4 @@ public class Posologie {
         this.posologie = posologie;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }

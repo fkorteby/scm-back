@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Duree {
+public class Duree extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -14,7 +14,6 @@ public class Duree {
 
     private String duree;
 
-    private Long idUtilisateur;
 
     public Duree(Long idDuree, String duree, Long idUtilisateur) {
         this.idDuree = idDuree;
@@ -46,11 +45,4 @@ public class Duree {
         this.duree = duree;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }

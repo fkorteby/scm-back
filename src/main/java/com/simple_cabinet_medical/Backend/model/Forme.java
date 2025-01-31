@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 
 @Entity
-public class Forme {
+public class Forme extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -20,8 +20,6 @@ public class Forme {
     @NotNull
     private String abreviation;
 
-    @NotNull
-    private Long idUtilisateur;
 
     public Forme (String forme, String abreviation, Long idUtilisateur) {
         this.forme = forme;
@@ -55,11 +53,4 @@ public class Forme {
         this.abreviation = abreviation;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }

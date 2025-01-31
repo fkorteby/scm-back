@@ -21,8 +21,8 @@ public class ConduiteController {
     }
 
     @GetMapping("/conduites")
-    public ResponseEntity<?> getAllConduite () {
-        return conduiteService.getAll();
+    public ResponseEntity<?> getAllConduite (@RequestParam Long idUtilisateur) {
+        return conduiteService.getAll(idUtilisateur);
     }
 
     @GetMapping("/conduites/utilisateur/{idUtilisateur}")
@@ -31,8 +31,8 @@ public class ConduiteController {
     }
 
     @DeleteMapping("/conduites/{idConduite}")
-    public ResponseEntity<?> deleteConduite (@PathVariable Long idConduite) {
-        return conduiteService.delete(idConduite);
+    public ResponseEntity<?> deleteConduite (@PathVariable Long idConduite, @RequestParam Long idUtilisateur) {
+        return conduiteService.delete(idConduite, idUtilisateur);
     }
 
     @PutMapping("/conduites/{idConduite}")

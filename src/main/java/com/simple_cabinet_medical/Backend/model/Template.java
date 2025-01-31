@@ -5,8 +5,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.util.Date;
+
 @Entity
-public class Template {
+public class Template extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -16,7 +18,6 @@ public class Template {
 
     private String text;
 
-    private Long idUtilisateur;
 
     public Template(Long idTemplate, String nom, String text, Long idUtilisateur) {
         this.idTemplate = idTemplate;
@@ -52,11 +53,4 @@ public class Template {
         this.text = text;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }

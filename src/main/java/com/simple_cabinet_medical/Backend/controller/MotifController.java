@@ -21,8 +21,8 @@ public class MotifController {
     }
 
     @GetMapping("/motif")
-    public ResponseEntity<?> getAllMotif () {
-        return motifService.getAllMotif();
+    public ResponseEntity<?> getAllMotif (@RequestParam Long idUtilisateur) {
+        return motifService.getAllMotif(idUtilisateur);
     }
 
     @GetMapping("/Motif")
@@ -31,8 +31,8 @@ public class MotifController {
     }
 
     @DeleteMapping("/motif/{idMotif}")
-    public ResponseEntity<?> deleteMotif (@PathVariable Long idMotif) {
-        return motifService.deleteMotif(idMotif);
+    public ResponseEntity<?> deleteMotif (@PathVariable Long idMotif, @RequestParam Long idUtilisateur) {
+        return motifService.deleteMotif(idMotif, idUtilisateur);
     }
 
     @PutMapping("/motif/{idMotif}")

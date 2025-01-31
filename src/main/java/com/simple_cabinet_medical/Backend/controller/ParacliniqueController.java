@@ -22,8 +22,8 @@ public class ParacliniqueController {
     }
 
     @GetMapping("/paracliniques")
-    public ResponseEntity<?> getAllParaclinique () {
-        return paracliniqueService.getAllParaclinique();
+    public ResponseEntity<?> getAllParaclinique (@RequestParam Long idUtilisateur) {
+        return paracliniqueService.getAllParaclinique(idUtilisateur);
     }
 
     @GetMapping("/paracliniques/{idUtilisateur}")
@@ -37,7 +37,7 @@ public class ParacliniqueController {
     }
 
     @DeleteMapping("/paracliniques/{idParaclinique}")
-    public ResponseEntity<?> deleteMedicament (@PathVariable Long idParaclinique) {
-        return paracliniqueService.deleteParaclinique(idParaclinique);
+    public ResponseEntity<?> deleteMedicament (@PathVariable Long idParaclinique, @RequestParam Long idUtilisateur) {
+        return paracliniqueService.deleteParaclinique(idParaclinique, idUtilisateur);
     }
 }

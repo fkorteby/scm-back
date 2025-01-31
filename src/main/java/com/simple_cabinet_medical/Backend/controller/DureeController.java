@@ -17,8 +17,8 @@ public class DureeController {
     }
 
     @GetMapping("/duree")
-    public ResponseEntity<?> findAllDuree () {
-        return dureeService.getAll();
+    public ResponseEntity<?> findAllDuree (@RequestParam Long idUtilisateur) {
+        return dureeService.getAll(idUtilisateur);
     }
 
     @GetMapping("/duree/{idUtilisateur}")
@@ -28,12 +28,13 @@ public class DureeController {
 
     @PostMapping("/duree")
     public ResponseEntity<?> createDuree (@RequestBody AddParametreRequest data) {
+
         return dureeService.add(data);
     }
 
     @DeleteMapping("/duree/{idDuree}")
-    public ResponseEntity<?> deleteDuree (@PathVariable Long idDuree) {
-        return dureeService.delete(idDuree);
+    public ResponseEntity<?> deleteDuree (@PathVariable Long idDuree, @RequestParam Long idUtilisateur) {
+        return dureeService.delete(idDuree, idUtilisateur);
     }
 
     @PutMapping("/duree/{idDuree}")

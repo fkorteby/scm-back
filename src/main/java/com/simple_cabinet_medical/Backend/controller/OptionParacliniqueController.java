@@ -16,8 +16,8 @@ public class OptionParacliniqueController {
     }
 
     @GetMapping("options-paraclinique")
-    public ResponseEntity<?> getAll () {
-        return optionParacliniqueService.getAll();
+    public ResponseEntity<?> getAll (@RequestParam Long idUtilisateur) {
+        return optionParacliniqueService.getAll(idUtilisateur);
     }
 
     @GetMapping("options-paraclinique/utilisateur/{idUtilisateur}")
@@ -31,8 +31,8 @@ public class OptionParacliniqueController {
     }
 
     @DeleteMapping("options-paraclinique/{idOption}")
-    public ResponseEntity<?> deleteOption (@PathVariable Long idOption) {
-        return optionParacliniqueService.delete(idOption);
+    public ResponseEntity<?> deleteOption (@PathVariable Long idOption, @RequestParam Long idUtilisateur) {
+        return optionParacliniqueService.delete(idOption, idUtilisateur);
     }
 
     @PutMapping("options-paraclinique/{idOption}")

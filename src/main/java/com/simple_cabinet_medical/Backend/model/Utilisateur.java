@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,17 +19,23 @@ public class Utilisateur implements UserDetails {
 
     private String nom;
 
+    private String prenom;
+
     private String nomUtilisateur;
 
     private String mdp;
 
-    private String role;
+    private EROLE role;
+
+    @ManyToOne
+    @JoinColumn(name = "idClient")
+    private Client client;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection <GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role));
+        authorities.add(new SimpleGrantedAuthority(role.toString()));
         return authorities;
     }
 
@@ -68,6 +71,22 @@ public class Utilisateur implements UserDetails {
         return nomUtilisateur;
     }
 
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
     public void setNomUtilisateur(String nomUtilisateur) {
         this.nomUtilisateur = nomUtilisateur;
     }
@@ -80,11 +99,11 @@ public class Utilisateur implements UserDetails {
         this.mdp = mdp;
     }
 
-    public String getRole() {
+    public EROLE getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(EROLE role) {
         this.role = role;
     }
 }

@@ -6,15 +6,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Motif {
+public class Motif extends BasedObject{
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long idMotif;
 
     private String motif;
-
-    private Long idUtilisateur;
 
 
     public Motif() {}
@@ -48,11 +46,4 @@ public class Motif {
         this.motif = motif;
     }
 
-    public Long getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Long idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
 }
