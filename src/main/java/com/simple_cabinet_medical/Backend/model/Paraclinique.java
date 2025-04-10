@@ -6,10 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Paraclinique extends BasedObject{
+public class Paraclinique extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idParaclinique;
 
     private String examen;
@@ -30,7 +30,8 @@ public class Paraclinique extends BasedObject{
         this.idUtilisateur = idUtilisateur;
     }
 
-    public Paraclinique() {}
+    public Paraclinique() {
+    }
 
 
     public Long getIdParaclinique() {

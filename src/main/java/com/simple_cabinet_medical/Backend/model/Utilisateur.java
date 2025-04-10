@@ -9,12 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
-
 @Entity
 public class Utilisateur implements UserDetails {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUtilisateur;
 
     private String nom;
@@ -34,7 +33,7 @@ public class Utilisateur implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection <GrantedAuthority> authorities = new ArrayList<>();
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(role.toString()));
         return authorities;
     }
@@ -49,7 +48,8 @@ public class Utilisateur implements UserDetails {
         return nomUtilisateur;
     }
 
-    public Utilisateur() {}
+    public Utilisateur() {
+    }
 
     public Long getIdUtilisateur() {
         return idUtilisateur;

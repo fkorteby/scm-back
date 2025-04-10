@@ -5,11 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-import java.util.Date;
-
 
 @Entity
-public class Document extends BasedObject{
+public class Document extends BasedObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +17,8 @@ public class Document extends BasedObject{
 
     private String text;
 
-    public Document() {}
+    public Document() {
+    }
 
     public Document(Long idDocument, String nomDocument, String text) {
         this.idDocument = idDocument;

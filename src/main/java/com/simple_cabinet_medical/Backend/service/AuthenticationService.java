@@ -4,6 +4,7 @@ import com.simple_cabinet_medical.Backend.model.EROLE;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.payload.request.LoginRequest;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
+import com.simple_cabinet_medical.Backend.repository.ClientRepository;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,8 @@ public class AuthenticationService {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -32,6 +35,7 @@ public class AuthenticationService {
         user.setNomUtilisateur(input.getNomUtilisateur());
         user.setMdp(passwordEncoder.encode(input.getMdp()));
         user.setRole(EROLE.valueOf(input.getRole()));
+        user.setClient(clientRepository.findById(input.getIdClient()).orElseThrow());
 
         return utilisateurRepository.save(user);
     }

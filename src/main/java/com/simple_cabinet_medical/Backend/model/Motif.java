@@ -6,16 +6,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Motif extends BasedObject{
+public class Motif extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMotif;
 
     private String motif;
 
 
-    public Motif() {}
+    public Motif() {
+    }
 
 
     public Motif(Long idMotif, String motif, Long idUtilisateur) {

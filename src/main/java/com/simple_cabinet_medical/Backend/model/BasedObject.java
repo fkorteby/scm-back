@@ -1,14 +1,17 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BasedObject {
 
+    @CreatedBy
     protected Long idUtilisateur;
 
     protected Date dateCreation;

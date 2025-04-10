@@ -1,21 +1,19 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-import java.util.Date;
+import jakarta.persistence.*;
+import org.springframework.lang.NonNull;
 
 @Entity
-public class Template extends BasedObject{
+public class Template extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTemplate;
 
+    @NonNull
     private String nom;
 
+    @Lob
     private String text;
 
 
@@ -26,7 +24,8 @@ public class Template extends BasedObject{
         this.idUtilisateur = idUtilisateur;
     }
 
-    public Template() {}
+    public Template() {
+    }
 
 
     public Long getIdTemplate() {

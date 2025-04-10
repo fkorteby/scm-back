@@ -6,10 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class OptionParaclinique extends BasedObject{
+public class OptionParaclinique extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOptionParaclinique;
 
     private String option;
@@ -22,13 +22,14 @@ public class OptionParaclinique extends BasedObject{
         this.idUtilisateur = idUtilisateur;
     }
 
-    public OptionParaclinique( String option, Long idUtilisateur) {
+    public OptionParaclinique(String option, Long idUtilisateur) {
         this.option = option;
         this.idUtilisateur = idUtilisateur;
     }
 
 
-    public OptionParaclinique() {}
+    public OptionParaclinique() {
+    }
 
 
     public Long getIdOptionParaclinique() {

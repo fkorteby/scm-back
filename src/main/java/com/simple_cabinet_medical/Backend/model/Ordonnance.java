@@ -1,25 +1,26 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
 import java.util.Set;
 
 
 @Entity
-public class Ordonnance extends BasedObject{
+public class Ordonnance extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOrdonnance;
 
-    @OneToOne (mappedBy = "ordonnance")
+    @OneToOne(mappedBy = "ordonnance")
     private Consultation consultation;
 
-    @OneToMany ( cascade = CascadeType.ALL  ,fetch = FetchType.LAZY)
-    @JoinColumn (name = "ordonnace_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ordonnace_id")
     private Set<Traitement> traitements;
 
-    public Ordonnance() {}
+    public Ordonnance() {
+    }
 
     public Long getIdOrdonnance() {
         return idOrdonnance;

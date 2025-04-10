@@ -1,19 +1,22 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import org.springframework.lang.NonNull;
+
 import java.util.List;
 import java.util.Set;
 
 @Entity
-public class Patient extends BasedObject{
+public class Patient extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPatient;
 
+    @NonNull
     private String nom;
 
+    @NonNull
     private String prenom;
 
     private String dateNaissance;
@@ -30,23 +33,40 @@ public class Patient extends BasedObject{
 
     private Boolean assurance;
 
+    @Lob
     private String antecedentsPersonnelsMedicaux;
 
+    @Lob
     private String antecedentsPersonnelsChirugicaux;
 
+    @Lob
     private String antecedentsFamiliaux;
 
+    @Lob
     private String autres;
 
-    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "patient_id")
     private List<Consultation> consultations;
 
-    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "patient_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "patient_id")
     private Set<Document> documents;
 
-    public Patient() {}
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Patient() {
+    }
 
     public Long getIdPatient() {
         return idPatient;

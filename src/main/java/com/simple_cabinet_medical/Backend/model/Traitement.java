@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 
 
 @Entity
-public class Traitement extends BasedObject{
+public class Traitement extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTraitement;
 
     @OneToOne
@@ -16,7 +16,8 @@ public class Traitement extends BasedObject{
     @OneToOne
     private Posologie posologie;
 
-    public Traitement() {}
+    public Traitement() {
+    }
 
     public Long getIdTraitement() {
         return idTraitement;

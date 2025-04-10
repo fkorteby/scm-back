@@ -7,10 +7,10 @@ import jakarta.persistence.Id;
 
 
 @Entity
-public class Medicament extends BasedObject{
+public class Medicament extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMedicament;
 
     private String nomCommerciale;
@@ -33,7 +33,8 @@ public class Medicament extends BasedObject{
         this.idUtilisateur = idUtilisateur;
     }
 
-    public Medicament() {}
+    public Medicament() {
+    }
 
     public Long getIdMedicament() {
         return idMedicament;

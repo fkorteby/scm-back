@@ -1,30 +1,32 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.Date;
 import java.util.Set;
 
 
 @Entity
-public class Client extends BasedObject{
+public class Client extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idClient;
 
+    @NotBlank
     private String nom;
 
-    @OneToMany (cascade = CascadeType.ALL , fetch = FetchType.LAZY)
-    @JoinColumn (name = "idClient")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idClient")
     private Set<Local> locals;
 
-    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "idClient")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idClient")
     private Set<Utilisateur> utilisateurs;
 
-    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "client_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "client_id")
     private Set<Patient> patients;
 
 
@@ -38,7 +40,8 @@ public class Client extends BasedObject{
         this.dateCreation = dateCreation;
     }
 
-    public Client () {}
+    public Client() {
+    }
 
     public Long getIdClient() {
         return idClient;

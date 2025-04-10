@@ -1,25 +1,27 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
-import java.util.Date;
 import java.util.Set;
 
 
 @Entity
-public class Local extends BasedObject{
+public class Local extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idLocal;
 
+    @NotNull
     private String adresse;
 
-    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn (name = "local_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "local_id")
     private Set<Consultation> consultations;
 
-    public Local() {}
+    public Local() {
+    }
 
     public Long getIdLocal() {
         return idLocal;

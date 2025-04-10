@@ -1,40 +1,19 @@
 package com.simple_cabinet_medical.Backend.repository;
 
-import com.simple_cabinet_medical.Backend.model.Client;
 import com.simple_cabinet_medical.Backend.model.Conduite;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
-@Repository
+@RepositoryRestResource
+@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+@PostFilter("hasPermission(filterObject,'READ')")
 public interface ConduiteRepository extends JpaRepository<Conduite, Long> {
 
     @Override
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
-    Conduite save (Conduite conduite);
-
-    @Override
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
-    void deleteById (Long id);
-
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
-    void deleteByConduite (String conduite);
-
-    @Override
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
-    Optional<Conduite> findById (Long id);
-
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN')")
-    Optional<Conduite> findByConduite (String conduite);
-
-    @Override
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MEDECIN') or hasAuthority('REMPLACANT')")
-    List<Conduite> findAll ();
-
-    List<Conduite> findAllByIdUtilisateur (Long id);
-
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT')")
+    List<Conduite> findAll();
 }

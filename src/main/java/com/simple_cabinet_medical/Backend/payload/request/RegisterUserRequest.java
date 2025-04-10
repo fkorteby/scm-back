@@ -7,14 +7,14 @@ public class RegisterUserRequest {
     private String mdp;
     private String nom;
     private String role;
+    private Long idClient;
 
-    public RegisterUserRequest() {}
-
-    public RegisterUserRequest(String nomUtilisateur, String mdp, String nom, String role) {
+    public RegisterUserRequest(String nomUtilisateur, String mdp, String nom, String role, Long idClient) {
         this.nomUtilisateur = nomUtilisateur;
         this.mdp = mdp;
         this.nom = nom;
         this.role = role;
+        this.idClient = idClient;
     }
 
     public String getNomUtilisateur() {
@@ -47,5 +47,13 @@ public class RegisterUserRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Long getIdClient() {
+        return idClient;
+    }
+
+    public void setIdClient(Long idClient) {
+        this.idClient = idClient;
     }
 }

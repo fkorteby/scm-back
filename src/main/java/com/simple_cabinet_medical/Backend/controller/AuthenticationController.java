@@ -6,16 +6,14 @@ import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
 import com.simple_cabinet_medical.Backend.payload.response.LoginResponse;
 import com.simple_cabinet_medical.Backend.service.AuthenticationService;
 import com.simple_cabinet_medical.Backend.service.JwtService;
-import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthenticationController {
 
     @Autowired
@@ -46,8 +44,8 @@ public class AuthenticationController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<String> getUsers () {
-        return ResponseEntity.ok("Hello world everyone");
+    public Authentication getUserInfo() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }
+

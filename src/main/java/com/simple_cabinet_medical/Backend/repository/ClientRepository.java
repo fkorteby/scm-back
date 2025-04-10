@@ -1,35 +1,25 @@
 package com.simple_cabinet_medical.Backend.repository;
 
 import com.simple_cabinet_medical.Backend.model.Client;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+@RepositoryRestResource()
+@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+@PostFilter("hasPermission(filterObject,'READ')")
+public interface ClientRepository extends JpaRepository<Client, Long> {
 
-@Repository
-public interface ClientRepository extends CrudRepository<Client, Long> {
+    @Override
+    @PreAuthorize("hasAnyAuthority('ADMIN') and (#client.idClient == null ? hasPermission(#client,'WRITE') : hasPermission(#client,'UPDATE'))")
+    Client save(Client client);
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN')")
-    Client save (Client client);
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    Optional<Client> findByNom (String nom);
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    Optional<Client> findById (Long id);
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Override
-    List<Client> findAll ();
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Override
-    void deleteById (Long id);
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    void deleteByNom (String nom);
+    void deleteById(Long id);
 }

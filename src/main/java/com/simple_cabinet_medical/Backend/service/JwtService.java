@@ -24,8 +24,8 @@ public class JwtService {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
-    public String extractNomUtilisateur (String token) {
-        return extractClaim (token, Claims::getSubject);
+    public String extractNomUtilisateur(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

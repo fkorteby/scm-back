@@ -1,21 +1,14 @@
 package com.simple_cabinet_medical.Backend.repository;
 
-import com.simple_cabinet_medical.Backend.model.Client;
-import com.simple_cabinet_medical.Backend.model.Conduite;
 import com.simple_cabinet_medical.Backend.model.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.util.List;
-
-@Repository
-public interface LocalRepository extends CrudRepository<Local, Long> {
-
-    @Override
-    Local save (Local local);
-
-    @Override
-    void deleteById (Long id);
+@RepositoryRestResource
+@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+@PostFilter("hasPermission(filterObject,'READ')")
+public interface LocalRepository extends JpaRepository<Local, Long> {
 
 }

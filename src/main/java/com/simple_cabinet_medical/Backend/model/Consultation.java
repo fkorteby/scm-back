@@ -2,34 +2,39 @@ package com.simple_cabinet_medical.Backend.model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+
 import java.util.Date;
 
 
 @Entity
-public class Consultation extends BasedObject{
+public class Consultation extends BasedObject {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idConsultation;
 
+//    @Lob
     private String motifConsultation;
 
     private Date dateConsultation;
 
+//    @Lob
     private String resultatExamenClinique;
 
+//    @Lob
     private String resultatExamenParacliniques;
 
+//    @Lob
     private String diagnosticMedical;
 
-    @OneToOne (fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     private Ordonnance ordonnance;
 
     @ManyToOne
     private Patient patient;
 
-    public Consultation() {}
+    public Consultation() {
+    }
 
     public Patient getPatient() {
         return patient;
