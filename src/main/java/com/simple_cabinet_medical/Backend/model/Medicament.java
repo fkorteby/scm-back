@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 
 @Entity
@@ -21,16 +18,17 @@ public class Medicament extends BasedObject {
 
     private String conditionnement;
 
-    private String forme;
+    @ManyToOne
+    @JoinColumn(name = "formeId",referencedColumnName = "idForme")
+    private Forme forme;
 
-
-    public Medicament(String nomCommerciale, String dci, String dosage, String conditionnement, String forme, Long idUtilisateur) {
+    public Medicament(Long idMedicament, String nomCommerciale, String dci, String dosage, String conditionnement, Forme forme) {
+        this.idMedicament = idMedicament;
         this.nomCommerciale = nomCommerciale;
         this.dci = dci;
         this.dosage = dosage;
         this.conditionnement = conditionnement;
         this.forme = forme;
-        this.idUtilisateur = idUtilisateur;
     }
 
     public Medicament() {
@@ -76,12 +74,10 @@ public class Medicament extends BasedObject {
         this.conditionnement = conditionnement;
     }
 
-    public String getForme() {
+    public Forme getForme() {
         return forme;
     }
-
-    public void setForme(String forme) {
+    public void setForme(Forme forme) {
         this.forme = forme;
     }
-
 }

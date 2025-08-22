@@ -4,18 +4,16 @@ import com.simple_cabinet_medical.Backend.model.*;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 
-import static com.simple_cabinet_medical.Backend.model.EAccessLevel.*;
-
 @Component
-@Primary
 public class CustomPermissionEvaluator implements PermissionEvaluator {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomPermissionEvaluator.class);
 
     private final UtilisateurRepository utilisateurRepository;
     private final EntityFetcher entityFetcher;
@@ -28,145 +26,73 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         if (authentication == null || targetDomainObject == null || permission == null) {
+            logger.warn("Permission denied: null authentication, target, or permission");
             return false;
         }
-
-        Utilisateur currentUser = (Utilisateur) authentication.getPrincipal();
-        EROLE role = currentUser.getRole();
-
-        if (role == null) {
-            return false;
-        }
-
-        switch (role) {
-            case ADMIN:
-                return true;
-
-            case MEDECIN:
-                return handleMedecinPermissions(currentUser, targetDomainObject, permission);
-
-            case REMPLACANT:
-                return handleRemplacantPermissions(currentUser, targetDomainObject, permission);
-
-            case SECRETAIRE:
-                return handleSecretairePermissions(currentUser, targetDomainObject, permission);
-
-            default:
-                return false;
-        }
+        return checkPermission((Utilisateur) authentication.getPrincipal(), targetDomainObject, permission);
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        if (authentication == null || targetId == null || targetType == null || permission == null) {
+        if (authentication == null || targetId == null || permission == null || targetType == null) {
+            logger.warn("Permission denied: null authentication, target, or permission");
             return false;
         }
-        Utilisateur currentUser = (Utilisateur) authentication.getPrincipal();
-        EROLE role = currentUser.getRole();
         Object targetDomainObject = entityFetcher.getEntity(targetType, (Long) targetId);
+        return checkPermission((Utilisateur) authentication.getPrincipal(), targetDomainObject, permission);
+    }
 
-        if (role == null) {
+    private boolean checkPermission(Utilisateur currentUser, Object targetDomainObject, Object permission) {
+        EAccessLevel level = parseAccessLevel(permission);
+        if (level == null) return false;
+
+        Long idUtilisateur = currentUser.getIdUtilisateur();
+        EROLE role = currentUser.getRole();
+        Long userClientId = null;
+
+        if (role == null) return false;
+        if (role == EROLE.ADMIN) return true;
+        if (currentUser.getRole()!=EROLE.ADMIN){
+            userClientId = currentUser.getClient().getIdClient();
+        }
+        if (!(targetDomainObject instanceof BasedObject basedObject)) {
+            logger.warn("Target object is not BasedObject: {}", targetDomainObject.getClass().getSimpleName());
             return false;
         }
-        switch (role) {
-            case ADMIN:
-                return true;
 
-            case MEDECIN:
-                return handleMedecinPermissions(currentUser, targetDomainObject, permission);
+        Long clientObjectId = basedObject.getClientCreatorId();
+        Long idUtilisateurObject = basedObject.getIdUtilisateur();
 
-            case REMPLACANT:
-                return handleRemplacantPermissions(currentUser, targetDomainObject, permission);
-
-            case SECRETAIRE:
-                return handleSecretairePermissions(currentUser, targetDomainObject, permission);
-
-            default:
-                return false;
+        // Règles selon le type
+        if (targetDomainObject instanceof Patient || targetDomainObject instanceof RendezVous) {
+            return userClientId.equals(clientObjectId);
         }
+        if (targetDomainObject instanceof Consultation || targetDomainObject instanceof Document || targetDomainObject instanceof Traitement) {
+            return switch (level) {
+                case UPDATE -> idUtilisateur.equals(idUtilisateurObject);
+                case READ -> userClientId.equals(clientObjectId);
+                case WRITE -> true;
+                default -> false;
+            };
+        }
+        if (targetDomainObject instanceof Utilisateur || targetDomainObject instanceof Client
+                || targetDomainObject instanceof ClientConfig || targetDomainObject instanceof Local) {
+            return (role.equals(EROLE.MEDECIN) && userClientId.equals(clientObjectId))
+                    || (level == EAccessLevel.READ && userClientId.equals(clientObjectId));
+        }
+        return (role.equals(EROLE.MEDECIN) && userClientId.equals(clientObjectId))
+                || (role.equals(EROLE.REMPLACANT) && level == EAccessLevel.READ && userClientId.equals(clientObjectId));
     }
 
-    private boolean handleMedecinPermissions(Utilisateur user, Object target, Object permission) {
-        if (permission.equals(READ.toString())) {
-            return handleReadAccess(user, target);
-        } else if (permission.equals(WRITE.toString()) || permission.equals(UPDATE.toString()) || permission.equals(DELETE.toString())) {
-            return handleWriteAccessForMedecin(user, target);
-        }
-        return false;
-    }
-
-    private boolean handleRemplacantPermissions(Utilisateur user, Object target, Object permission) {
-
-        if (permission.equals(READ.toString())) {
-            return handleReadAccess(user, target);
-        } else if (permission.equals(DELETE.toString()) || permission.equals(UPDATE.toString())) {
-            if (target instanceof Patient) {
-                return true;
-            }
-            return isSameUser(user, getUtilisateurByTarget(target).getIdUtilisateur());
-        }
-        return false;
-    }
-
-    private boolean handleSecretairePermissions(Utilisateur user, Object target, Object permission) {
-
-        if (permission.equals(READ.toString())) {
-            return isSameClient(user, getUtilisateurByTarget(target).getIdUtilisateur());
-        } else if (permission.equals(WRITE.toString()) || permission.equals(DELETE.toString()) || permission.equals(UPDATE.toString())) {
-            if (target instanceof Patient) {
-                return true;
+    private EAccessLevel parseAccessLevel(Object permission) {
+        if (permission instanceof String s) {
+            try {
+                return EAccessLevel.valueOf(s);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Unknown permission: {}", s);
+                return null;
             }
         }
-        return false;
-    }
-
-    private boolean handleReadAccess(Utilisateur user, Object target) {
-        if (target instanceof Client) {
-            return isSameClient(user, ((Client) target).getIdUtilisateur());
-        } else if (target instanceof BasedObject) {
-            return isSameClient(user, ((BasedObject) target).getIdUtilisateur());
-        }
-        return false;
-    }
-
-    private boolean handleWriteAccessForMedecin(Utilisateur user, Object target) {
-
-        if (target instanceof Ordonnance || target instanceof Consultation
-                || target instanceof Traitement || target instanceof Document) {
-
-            Utilisateur targetUser = getUtilisateurByTarget(target);
-            if (targetUser == null) {
-                return false;
-            }
-            if (targetUser.getRole() == EROLE.MEDECIN) {
-                return isSameUser(user, targetUser.getIdUtilisateur());
-            } else if (targetUser.getRole() == EROLE.REMPLACANT) {
-                return true;
-            }
-        } else {
-            return true;
-        }
-
-        return false;
-    }
-
-    private Utilisateur getUtilisateurByTarget(Object target) {
-        if (!(target instanceof BasedObject)) {
-            return null;
-        }
-        Long idUtilisateur = ((BasedObject) target).getIdUtilisateur();
-        return utilisateurRepository.findById(idUtilisateur).orElse(null);
-    }
-
-    private boolean isSameClient(Utilisateur user, Long idUtilisateur) {
-        Utilisateur targetUser = utilisateurRepository.findById(idUtilisateur).orElse(null);
-        if (targetUser == null || targetUser.getClient() == null || user.getClient() == null) {
-            return false;
-        }
-        return targetUser.getClient().getIdClient().equals(user.getClient().getIdClient());
-    }
-
-    private boolean isSameUser(Utilisateur user, Long idUtilisateur) {
-        return idUtilisateur != null && user.getIdUtilisateur().equals(idUtilisateur);
+        return permission instanceof EAccessLevel e ? e : null;
     }
 }

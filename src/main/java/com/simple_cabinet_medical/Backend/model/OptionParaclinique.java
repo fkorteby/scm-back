@@ -14,19 +14,11 @@ public class OptionParaclinique extends BasedObject {
 
     private String option;
 
-    private Long idUtilisateur;
 
-    public OptionParaclinique(Long idOptionParaclinique, String option, Long idUtilisateur) {
+    public OptionParaclinique(Long idOptionParaclinique, String option) {
         this.idOptionParaclinique = idOptionParaclinique;
         this.option = option;
-        this.idUtilisateur = idUtilisateur;
     }
-
-    public OptionParaclinique(String option, Long idUtilisateur) {
-        this.option = option;
-        this.idUtilisateur = idUtilisateur;
-    }
-
 
     public OptionParaclinique() {
     }

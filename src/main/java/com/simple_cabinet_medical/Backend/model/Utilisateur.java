@@ -16,17 +16,23 @@ public class Utilisateur implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUtilisateur;
 
+    @Column(nullable = false)
     private String nom;
 
+    @Column(nullable = false)
     private String prenom;
 
+    @Column(nullable = false,unique = true)
     private String nomUtilisateur;
 
+    @Column(nullable = false)
     private String mdp;
 
+    @Column(nullable = false)
     private EROLE role;
 
     @ManyToOne
+
     @JoinColumn(name = "idClient")
     private Client client;
 

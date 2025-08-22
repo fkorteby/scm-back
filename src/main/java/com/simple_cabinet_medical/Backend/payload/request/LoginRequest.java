@@ -5,12 +5,22 @@ public class LoginRequest {
 
     private String nomUtilisateur;
     private String mdp;
+    private String recaptchaToken;
 
     public LoginRequest() {}
 
-    public LoginRequest(String nomUtilisateur, String mdp) {
+    public LoginRequest(String nomUtilisateur, String mdp, String recaptchaToken) {
         this.nomUtilisateur = nomUtilisateur;
         this.mdp = mdp;
+        this.recaptchaToken = recaptchaToken;
+    }
+
+    public String getRecaptchaToken() {
+        return recaptchaToken;
+    }
+
+    public void setRecaptchaToken(String recaptchaToken) {
+        this.recaptchaToken = recaptchaToken;
     }
 
     public String getNomUtilisateur() {

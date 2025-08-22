@@ -7,15 +7,16 @@ public class LoginResponse {
     private String nomUtilisateur;
     private String role;
     private String token;
+    private Long client;
 
-    public LoginResponse (String accessToken, Long id, String username, String role) {
-        this.token = accessToken;
+    public LoginResponse(Long id, String nomUtilisateur, String role, String token, Long client) {
         this.id = id;
-        this.nomUtilisateur = username;
+        this.nomUtilisateur = nomUtilisateur;
         this.role = role;
+        this.token = token;
+        this.client = client;
     }
-
-    public LoginResponse() {}
+    public LoginResponse(){}
 
     public Long getId() {
         return id;
@@ -47,5 +48,13 @@ public class LoginResponse {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public Long getClient() {
+        return client;
+    }
+
+    public void setClient(Long client) {
+        this.client = client;
     }
 }

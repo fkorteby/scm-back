@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Date;
+
 
 @Entity
 public class Forme extends BasedObject {
@@ -21,13 +23,14 @@ public class Forme extends BasedObject {
     private String abreviation;
 
 
-    public Forme(String forme, String abreviation, Long idUtilisateur) {
+    public Forme(Long idForme, String forme, String abreviation) {
+        this.idForme = idForme;
         this.forme = forme;
         this.abreviation = abreviation;
-        this.idUtilisateur = idUtilisateur;
     }
 
     public Forme() {
+
     }
 
     public Long getIdForme() {

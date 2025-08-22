@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 
 @Entity
@@ -17,13 +14,29 @@ public class Document extends BasedObject {
 
     private String text;
 
+    private ETypeDocument ETypeDocument;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id", referencedColumnName = "idPatient")
+    private Patient patient;
+
     public Document() {
     }
 
-    public Document(Long idDocument, String nomDocument, String text) {
+    public Document(Long idDocument, String nomDocument, String text, ETypeDocument ETypeDocument, Patient patient) {
         this.idDocument = idDocument;
         this.nomDocument = nomDocument;
         this.text = text;
+        this.ETypeDocument = ETypeDocument;
+        this.patient = patient;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
     public Long getIdDocument() {
@@ -50,4 +63,11 @@ public class Document extends BasedObject {
         this.text = text;
     }
 
+    public ETypeDocument getTypeDocument() {
+        return ETypeDocument;
+    }
+
+    public void setTypeDocument(ETypeDocument ETypeDocument) {
+        this.ETypeDocument = ETypeDocument;
+    }
 }

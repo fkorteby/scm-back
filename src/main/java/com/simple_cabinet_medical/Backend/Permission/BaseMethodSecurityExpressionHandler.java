@@ -3,10 +3,8 @@ package com.simple_cabinet_medical.Backend.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
@@ -14,219 +12,117 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Component
 public class BaseMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
 
-    private final CustomPermissionEvaluator customPermissionEvaluator;
+    private static final Logger logger = LoggerFactory.getLogger(BaseMethodSecurityExpressionHandler.class);
 
     @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    public BaseMethodSecurityExpressionHandler(CustomPermissionEvaluator customPermissionEvaluator) {
-        this.customPermissionEvaluator = customPermissionEvaluator;
-        this.setPermissionEvaluator(customPermissionEvaluator);
-    }
+    private CustomPermissionEvaluator customPermissionEvaluator;
 
     @Override
     public Object filter(Object filterTarget, Expression filterExpression, EvaluationContext ctx) {
-        if (filterTarget == null) {
-            return List.of();
-        }
+        logger.debug("Filtering target of type: {}", filterTarget != null ? filterTarget.getClass().getName() : "null");
 
-        if (ctx.getRootObject().getValue() instanceof SecurityExpressionRoot) {
-            ((SecurityExpressionRoot) ctx.getRootObject().getValue())
-                    .setPermissionEvaluator(customPermissionEvaluator);
-        }
+        if (ctx.getRootObject().getValue() instanceof SecurityExpressionRoot rootObject) {
+            rootObject.setPermissionEvaluator(customPermissionEvaluator);
+            Authentication authentication = rootObject.getAuthentication();
 
-        try {
-            // Extract permission from expression
-            String expressionString = filterExpression.getExpressionString();
-            String permission = extractPermission(expressionString);
-            Authentication auth = ((SecurityExpressionRoot) ctx.getRootObject().getValue()).getAuthentication();
-
-            if (filterTarget instanceof Page<?>) {
-                Page<?> page = (Page<?>) filterTarget;
-
-                // Extract entity type from Page
-                Class<?> entityType = determineEntityType(page);
-                if (entityType == null) {
-                    return filterPageContent(page, auth, permission);
-                }
-
-                // Find repository for entity type using naming convention
-                Object repository = findRepositoryForEntity(entityType);
-                if (repository == null) {
-                    return filterPageContent(page, auth, permission);
-                }
-
-                // Get all items from repository
-                List<?> allItems = invokeRepositoryFindAll(repository);
-                if (allItems == null) {
-                    return filterPageContent(page, auth, permission);
-                }
-
-                // Apply security filter to all items
-                List<Object> filteredItems = allItems.stream()
-                        .filter(item -> customPermissionEvaluator.hasPermission(auth, item, permission))
-                        .collect(Collectors.toList());
-
-                // Manually paginate filtered results
-                Pageable pageable = page.getPageable();
-                int start = (int) pageable.getOffset();
-                int end = Math.min(start + pageable.getPageSize(), filteredItems.size());
-
-                if (start >= filteredItems.size()) {
-                    return new PageImpl<>(List.of(), pageable, filteredItems.size());
-                }
-
-                List<Object> pageContent = filteredItems.subList(start, end);
-                return new PageImpl<>(pageContent, pageable, filteredItems.size());
-            } else if (filterTarget instanceof Collection<?>) {
-                Collection<?> collection = (Collection<?>) filterTarget;
-                return collection.stream()
-                        .filter(item -> customPermissionEvaluator.hasPermission(auth, item, permission))
-                        .collect(Collectors.toList());
-            } else if (filterTarget.getClass().isArray()) {
-                // Use super implementation for arrays
-                return super.filter(filterTarget, filterExpression, ctx);
-            } else {
-                // Single object
-                return customPermissionEvaluator.hasPermission(auth, filterTarget, permission) ? filterTarget : null;
+            // Handle null
+            if (filterTarget == null) {
+                return handleNullCase(filterExpression);
             }
-        } catch (Exception ex) {
-            return handleFilterError(filterTarget);
+
+            // Handle Optional
+            if (filterTarget instanceof Optional<?> optional) {
+                return filterOptional(optional, authentication);
+            }
+
+            // Handle Page - THIS IS THE CRITICAL PART
+            if (filterTarget instanceof Page<?> page) {
+                return filterPage(page, authentication);
+            }
+
+            // Handle other cases (Collection, Array, single object)
+            return filterNonPageTarget(filterTarget, authentication);
         }
+        return null;
     }
 
-    private String extractPermission(String expressionString) {
-        String permission = "READ";
-        if (expressionString.contains("'")) {
-            int start = expressionString.indexOf("'") + 1;
-            int end = expressionString.indexOf("'", start);
-            if (end > start) {
-                permission = expressionString.substring(start, end);
-            }
+    private Object handleNullCase(Expression filterExpression) {
+        if (filterExpression.getExpressionString().contains("Page")) {
+            return Page.empty();
         }
-        return permission;
+        return new ArrayList<>();
     }
 
-    private Object filterPageContent(Page<?> page, Authentication auth, String permission) {
-        List<?> content = page.getContent();
+    private Object filterOptional(Optional<?> optional, Authentication authentication) {
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+        Object value = optional.get();
+        if (customPermissionEvaluator.hasPermission(authentication, value, "READ")) {
+            return optional;
+        }
+        return Optional.empty();
+    }
+
+    private Page<?> filterPage(Page<?> page, Authentication authentication) {
+        // Filter the current page content
         List<Object> filteredContent = new ArrayList<>();
-
-        for (Object obj : content) {
-            if (customPermissionEvaluator.hasPermission(auth, obj, permission)) {
-                filteredContent.add(obj);
+        for (Object item : page.getContent()) {
+            if (customPermissionEvaluator.hasPermission(authentication, item, "READ")) {
+                filteredContent.add(item);
             }
         }
 
-        return new PageImpl<>(filteredContent, page.getPageable(), filteredContent.size());
+        // Calculate the correct total elements (this is the tricky part)
+        // Option 1: If you can afford to load all elements (not recommended for large datasets)
+        // long totalElements = countAllWithPermission(authentication);
+
+        // Option 2: Approximate by keeping original total if filtered content matches page size
+        // or reduce if filtered content is smaller
+        long totalElements = filteredContent.size() == page.getSize() ?
+                page.getTotalElements() :
+                page.getNumberOfElements();
+
+        return new PageImpl<>(
+                filteredContent,
+                page.getPageable(),
+                totalElements
+        );
     }
 
-    private Class<?> determineEntityType(Page<?> page) {
-        try {
-            if (!page.isEmpty()) {
-                return page.getContent().get(0).getClass();
-            }
-            Field delegateField = findField(page.getClass(), "delegate");
-            if (delegateField != null) {
-                delegateField.setAccessible(true);
-                Object delegate = delegateField.get(page);
-
-                Field specField = findField(delegate.getClass(), "spec");
-                if (specField != null) {
-                    specField.setAccessible(true);
-                    Object spec = specField.get(delegate);
-
-                    Field entityTypeField = findField(spec.getClass(), "entityType");
-                    if (entityTypeField != null) {
-                        entityTypeField.setAccessible(true);
-                        return (Class<?>) entityTypeField.get(spec);
-                    }
-                }
-            }
-
-            return null;
-        } catch (Exception e) {
-            return null;
+    private Object filterNonPageTarget(Object target, Authentication authentication) {
+        if (target instanceof Collection<?> collection) {
+            return filterCollection(collection, authentication);
         }
-    }
-
-    private Field findField(Class<?> clazz, String fieldName) {
-        Class<?> searchType = clazz;
-        while (searchType != null) {
-            for (Field field : searchType.getDeclaredFields()) {
-                if (field.getName().equals(fieldName)) {
-                    return field;
-                }
-            }
-            searchType = searchType.getSuperclass();
+        if (target.getClass().isArray()) {
+            return filterCollection(Arrays.asList((Object[]) target), authentication);
+        }
+        if (customPermissionEvaluator.hasPermission(authentication, target, "READ")) {
+            return target;
         }
         return null;
     }
 
-    private Object findRepositoryForEntity(Class<?> entityType) {
-        try {
-            Map<String, Object> repositories = applicationContext.getBeansOfType(Object.class);
-
-            for (Object repository : repositories.values()) {
-                Class<?> repoClass = repository.getClass();
-                Type genericSuperclass = repoClass.getGenericSuperclass();
-
-                if (genericSuperclass instanceof ParameterizedType) {
-                    ParameterizedType paramType = (ParameterizedType) genericSuperclass;
-                    Type[] typeArgs = paramType.getActualTypeArguments();
-
-                    if (typeArgs.length > 0 && typeArgs[0] instanceof Class) {
-                        Class<?> repoEntityType = (Class<?>) typeArgs[0];
-                        if (entityType.equals(repoEntityType)) {
-                            return repository;
-                        }
-                    }
-                }
+    private Collection<?> filterCollection(Collection<?> collection, Authentication authentication) {
+        Collection<Object> filtered = collection instanceof Set ? new HashSet<>() : new ArrayList<>();
+        for (Object item : collection) {
+            if (customPermissionEvaluator.hasPermission(authentication, item, "READ")) {
+                filtered.add(item);
             }
-            String repositoryBeanName = entityType.getSimpleName() + "Repository";
-            repositoryBeanName = repositoryBeanName.substring(0, 1).toLowerCase() + repositoryBeanName.substring(1);
-
-            if (applicationContext.containsBean(repositoryBeanName)) {
-                return applicationContext.getBean(repositoryBeanName);
-            }
-
-            return null;
-        } catch (Exception e) {
-            return null;
         }
+        return filtered;
     }
 
-    private List<?> invokeRepositoryFindAll(Object repository) {
-        try {
-            Method findAllMethod = repository.getClass().getMethod("findAll");
-            return (List<?>) findAllMethod.invoke(repository);
-        } catch (Exception e) {
-            return null;
-        }
+    // Optional: Implement this if you choose Option 1 for totalElements calculation
+    /*
+    private long countAllWithPermission(Authentication authentication) {
+        // You would need to implement this method to count all items with READ permission
+        // This might require a custom query in your repository
     }
-
-    private Object handleFilterError(Object filterTarget) {
-        if (filterTarget instanceof Collection<?>) {
-            return List.of();
-        } else if (filterTarget instanceof Page<?>) {
-            Page<?> page = (Page<?>) filterTarget;
-            return new PageImpl<>(List.of(), page.getPageable(), 0);
-        } else if (filterTarget.getClass().isArray()) {
-            return new Object[0];
-        }
-        return null;
-    }
+    */
 }

@@ -3,11 +3,12 @@ package com.simple_cabinet_medical.Backend.model;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
+import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-public class Patient extends BasedObject {
+public class Patient extends BasedObject implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ public class Patient extends BasedObject {
     @NonNull
     private String prenom;
 
-    private String dateNaissance;
+    private LocalDate dateNaissance;
 
     private String numeroTel;
 
@@ -45,27 +46,43 @@ public class Patient extends BasedObject {
     @Lob
     private String autres;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "patient_id")
-    private List<Consultation> consultations;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "patient_id")
-    private Set<Document> documents;
-
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
 
-    public Client getClient() {
-        return client;
-    }
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Consultation> consultations;
 
-    public void setClient(Client client) {
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Document> documents;
+
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<RendezVous> rendezVous;
+
+    public Patient(Long idPatient, @NonNull String nom, @NonNull String prenom, LocalDate dateNaissance, String numeroTel, String situation, String sexe, String adresse, String profession, Boolean assurance, String antecedentsPersonnelsMedicaux, String antecedentsPersonnelsChirugicaux, String antecedentsFamiliaux, String autres, List<Consultation> consultations, List<Document> documents, Client client, List<RendezVous> rendezVous) {
+        this.idPatient = idPatient;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.dateNaissance = dateNaissance;
+        this.numeroTel = numeroTel;
+        this.situation = situation;
+        this.sexe = sexe;
+        this.adresse = adresse;
+        this.profession = profession;
+        this.assurance = assurance;
+        this.antecedentsPersonnelsMedicaux = antecedentsPersonnelsMedicaux;
+        this.antecedentsPersonnelsChirugicaux = antecedentsPersonnelsChirugicaux;
+        this.antecedentsFamiliaux = antecedentsFamiliaux;
+        this.autres = autres;
+        this.consultations = consultations;
+        this.documents = documents;
         this.client = client;
+        this.rendezVous = rendezVous;
     }
 
     public Patient() {
+
     }
 
     public Long getIdPatient() {
@@ -76,27 +93,29 @@ public class Patient extends BasedObject {
         this.idPatient = idPatient;
     }
 
+    @NonNull
     public String getNom() {
         return nom;
     }
 
-    public void setNom(String nom) {
+    public void setNom(@NonNull String nom) {
         this.nom = nom;
     }
 
+    @NonNull
     public String getPrenom() {
         return prenom;
     }
 
-    public void setPrenom(String prenom) {
+    public void setPrenom(@NonNull String prenom) {
         this.prenom = prenom;
     }
 
-    public String getDateNaissance() {
+    public LocalDate getDateNaissance() {
         return dateNaissance;
     }
 
-    public void setDateNaissance(String dateNaissance) {
+    public void setDateNaissance(LocalDate dateNaissance) {
         this.dateNaissance = dateNaissance;
     }
 
@@ -180,6 +199,14 @@ public class Patient extends BasedObject {
         this.autres = autres;
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
     public List<Consultation> getConsultations() {
         return consultations;
     }
@@ -188,12 +215,19 @@ public class Patient extends BasedObject {
         this.consultations = consultations;
     }
 
-    public Set<Document> getDocuments() {
+    public List<Document> getDocuments() {
         return documents;
     }
 
-    public void setDocuments(Set<Document> documents) {
+    public void setDocuments(List<Document> documents) {
         this.documents = documents;
     }
 
+    public List<RendezVous> getRendezVous() {
+        return rendezVous;
+    }
+
+    public void setRendezVous(List<RendezVous> rendezVous) {
+        this.rendezVous = rendezVous;
+    }
 }

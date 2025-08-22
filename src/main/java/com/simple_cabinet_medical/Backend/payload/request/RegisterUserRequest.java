@@ -6,13 +6,15 @@ public class RegisterUserRequest {
     private String nomUtilisateur;
     private String mdp;
     private String nom;
+    private String prenom;
     private String role;
     private Long idClient;
 
-    public RegisterUserRequest(String nomUtilisateur, String mdp, String nom, String role, Long idClient) {
+    public RegisterUserRequest(String nomUtilisateur, String mdp, String nom, String prenom, String role, Long idClient) {
         this.nomUtilisateur = nomUtilisateur;
         this.mdp = mdp;
         this.nom = nom;
+        this.prenom = prenom;
         this.role = role;
         this.idClient = idClient;
     }
@@ -39,6 +41,14 @@ public class RegisterUserRequest {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
     }
 
     public String getRole() {

@@ -18,18 +18,10 @@ public class Motif extends BasedObject {
     public Motif() {
     }
 
-
-    public Motif(Long idMotif, String motif, Long idUtilisateur) {
+    public Motif(Long idMotif, String motif) {
         this.idMotif = idMotif;
         this.motif = motif;
-        this.idUtilisateur = idUtilisateur;
     }
-
-    public Motif(String motif, Long idUtilisateur) {
-        this.motif = motif;
-        this.idUtilisateur = idUtilisateur;
-    }
-
 
     public Long getIdMotif() {
         return idMotif;
@@ -46,5 +38,4 @@ public class Motif extends BasedObject {
     public void setMotif(String motif) {
         this.motif = motif;
     }
-
 }
