@@ -10,27 +10,43 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface ParacliniqueRepository extends JpaRepository<Paraclinique, Long> {
 
+    @PreAuthorize("((#paraclinique.idParaclinique == null or #paraclinique.idParaclinique == 0) ? hasPermission(#paraclinique,'WRITE') : hasPermission(#paraclinique,'UPDATE'))")
+    Paraclinique save(Paraclinique paraclinique);
+
     @RestResource(path = "byClient")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
-    Page<Paraclinique> findAllByClientCreatorId(@Param("clientId") Long clientCreatorId, Pageable pageable);
+    Page<Paraclinique> findAllByClientCreatorIdIn(@Param("clientId") Collection<Long> clientCreatorIds, Pageable pageable);
 
     @RestResource(path = "allByExamen")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     Page<Paraclinique> findByExamenContainingIgnoreCase(String examen, Pageable pageable);
 
     @RestResource(path = "byExamen")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
-    Page<Paraclinique> findByClientCreatorIdAndExamenContainingIgnoreCase(@Param("clientId") Long clientCreatorId, String examen, Pageable pageable);
+    Page<Paraclinique> findByClientCreatorIdInAndExamenContainingIgnoreCase(@Param("clientId") Collection<Long> clientCreatorIds, String examen, Pageable pageable);
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<Paraclinique> findById(Long aLong);
+
+    @PreAuthorize("hasPermission(#id, 'Paraclinique', 'DELETE')")
+    @Override
+    void deleteById(Long id);
+
+    @RestResource(path = "byClientAndType")
+    Page<Paraclinique> findByClientCreatorIdInAndTypeIgnoreCase(
+            @Param("clientId") Collection<Long> clientCreatorIds,
+            @Param("type") String type,
+            Pageable pageable
+    );
+    @RestResource(path = "byClientAndTypeAndExamen")
+    Page<Paraclinique> findByClientCreatorIdInAndTypeIgnoreCaseAndExamenContainingIgnoreCase(
+            @Param("clientId") Collection<Long> clientCreatorIds,
+            @Param("type") String type,
+            @Param("examen") String examen,
+            Pageable pageable
+    );
 }

@@ -1,0 +1,10 @@
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 comprimé 2 ou 3 fois par jour.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 gel par jour.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 comprimé par jour.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 cuillère par jour.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 application par 2 jours.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 comprimé le soir au dinner');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '2 fois par jours');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 gél le soir avant le dinner');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 lyoc par jour.');
+INSERT INTO posologie(client_creator_id, posologie) VALUES (1, '1 GELULE 2 FOIS PAR JOUR');

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .content {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #333;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            text-align: center;
+            color: #777;
+        }
+        .info-box {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .info-row {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #444;
+        }
+        .value {
+            color: #222;
+        }
+        .description-title {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #444;
+        }
+        .description-box {
+            background: #fafafa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #444;
+            white-space: pre-wrap; /* Conserve les retours à la ligne du médecin */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <img src="cid:logoSCM" width="300" alt="Logo SCM">
+    </div>
+
+    <div class="content">
+        <p>Bonjour l'équipe Support,</p>
+
+        <p>
+            Un nouveau ticket d'assistance a été créé avec succès sur la plateforme
+            <strong>SCM – Simple Cabinet Médical</strong>.
+        </p>
+
+        <p style="color:#2980b9; font-weight:bold;">
+            Détails de la demande (Ticket #<span th:text="${id}"></span>) :
+        </p>
+
+        <div class="info-box">
+            <div class="info-row">
+                <span class="label">Établissement :</span>
+                <span class="value" th:text="${etablissementNom}"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Demandeur :</span>
+                <span class="value" th:text="${nomDemandeur} + ' (' + ${emailDemandeur} + ')'"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Téléphone :</span>
+                <span class="value" th:text="${medecinTelephone}"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Type / Module :</span>
+                <span class="value" th:text="${type} + ' / ' + ${module}"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Sujet :</span>
+                <span class="value" th:text="${sujet}"></span>
+            </div>
+            <div class="info-row" style="font-size: 12px; margin-top: 15px; color: #777;">
+                <span class="label" style="color: #777;">Navigateur & OS :</span>
+                <span class="value" style="color: #666;" th:text="${userAgent}"></span>
+            </div>
+        </div>
+
+        <div class="description-title">Description du problème :</div>
+        <div class="description-box" th:text="${description}">
+            Détails textuels saisis par l'utilisateur...
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Simple Cabinet Médical &bull; Notification automatique Support
+    </div>
+
+</div>
+</body>
+</html>

@@ -14,23 +14,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Optional;
 
 @RepositoryRestResource(excerptProjection = OrdonnanceTypeProjection.class)
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface OrdonnanceTypeRepository extends JpaRepository<OrdonnanceType, Long> {
 
+    @PreAuthorize("((#ordonnanceType.idOrdonnanceType == null or #ordonnanceType.idOrdonnanceType == 0) ? hasPermission(#ordonnanceType,'WRITE') : hasPermission(#ordonnanceType,'UPDATE'))")
+    OrdonnanceType save(OrdonnanceType ordonnanceType);
     @RestResource(path = "byClient")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<OrdonnanceType> findAllByClientCreatorId(@Param("clientId") Long clientCreatorId, Pageable pageable);
 
     @RestResource(path = "byName")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<OrdonnanceType> findByClientCreatorIdAndNameContainingIgnoreCase(@Param("clientId") Long clientCreatorId, String name, Pageable pageable);
 
     @RestResource(path = "AllbyName")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     Page<OrdonnanceType> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<OrdonnanceType> findById(Long aLong);
+
+    @PreAuthorize("hasPermission(#id, 'OrdonnanceType', 'DELETE')")
+    @Override
+    void deleteById(Long id);
 }

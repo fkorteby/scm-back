@@ -1,10 +1,7 @@
 package com.simple_cabinet_medical.Backend.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Posologie extends BasedObject {
@@ -13,6 +10,7 @@ public class Posologie extends BasedObject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPosologie;
 
+    @Column(nullable = false)
     private String posologie;
 
     public Posologie() {

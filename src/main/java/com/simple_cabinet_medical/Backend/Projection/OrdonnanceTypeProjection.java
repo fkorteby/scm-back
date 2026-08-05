@@ -9,5 +9,6 @@ import java.util.Set;
 public interface OrdonnanceTypeProjection {
     Long getIdOrdonnanceType();
     String getName();
+    Long getIdUtilisateur();
     Set<TraitmentInfo> getTraitements();
 }

@@ -13,24 +13,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Optional;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface LettreOrientationTypeRepository extends JpaRepository<LettreOrientationType, Long> {
 
+    @PreAuthorize("((#lettreOrientationType.idLettreOrientation == null or #lettreOrientationType.idLettreOrientation == 0) ? hasPermission(#lettreOrientationType,'WRITE') : hasPermission(#lettreOrientationType,'UPDATE'))")
+    LettreOrientationType save(LettreOrientationType lettreOrientationType);
+
     @RestResource(path = "byClient")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<LettreOrientationType> findAllByClientCreatorId(@Param("clientId") Long clientCreatorId, Pageable pageable);
 
     @RestResource(path = "byName")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<LettreOrientationType> findByClientCreatorIdAndNomLettreOrientationContainingIgnoreCase(
-            @Param("clientId") Long clientCreatorId, String nomLettreOrientation, Pageable pageable);
+            @Param("clientId") Long clientCreatorId,@Param("name") String nomLettreOrientation, Pageable pageable);
 
     @RestResource(path = "AllbyName")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     Page<LettreOrientationType> findByNomLettreOrientationContainingIgnoreCase(String nomLettreOrientation, Pageable pageable);
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<LettreOrientationType> findById(Long aLong);
+
+    @PreAuthorize("hasPermission(#id, 'LettreOrientationType', 'DELETE')")
+    @Override
+    void deleteById(Long id);
 }

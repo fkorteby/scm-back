@@ -1,8 +1,8 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 
+import java.math.BigInteger;
 import java.util.Set;
 
 
@@ -13,37 +13,42 @@ public class Local extends BasedObject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idLocal;
 
-    @NotBlank
     private String nomLocal;
-    @NotBlank
+
     private String nomLocalEnArabe;
     private String adresse;
     private String codePostal;
     private String ville;
+    private BigInteger latitude;
+    private BigInteger longitude;
+    private String displayName;
     private String pays;
     private String telephone;
     private String mobile;
-    private String locationMaps;
+
     private EStatus status;
 
     @ManyToOne
+    @JoinColumn(name = "id_client")
     private Client client;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "local_id")
     private Set<Consultation> consultations;
 
-    public Local(Long idLocal, String nomLocal, String nomLocalEnArabe, String adresse, String codePostal, String ville, String pays, String telephone, String mobile, String locationMaps, EStatus status, Client client, Set<Consultation> consultations) {
+    public Local(Long idLocal, String nomLocal, String nomLocalEnArabe, String adresse, String codePostal, String ville, BigInteger latitude, BigInteger longitude, String displayName, String pays, String telephone, String mobile, EStatus status, Client client, Set<Consultation> consultations) {
         this.idLocal = idLocal;
         this.nomLocal = nomLocal;
         this.nomLocalEnArabe = nomLocalEnArabe;
         this.adresse = adresse;
         this.codePostal = codePostal;
         this.ville = ville;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.displayName = displayName;
         this.pays = pays;
         this.telephone = telephone;
         this.mobile = mobile;
-        this.locationMaps = locationMaps;
         this.status = status;
         this.client = client;
         this.consultations = consultations;
@@ -101,6 +106,30 @@ public class Local extends BasedObject {
         this.ville = ville;
     }
 
+    public BigInteger getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(BigInteger latitude) {
+        this.latitude = latitude;
+    }
+
+    public BigInteger getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(BigInteger longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public String getPays() {
         return pays;
     }
@@ -123,14 +152,6 @@ public class Local extends BasedObject {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
-    }
-
-    public String getLocationMaps() {
-        return locationMaps;
-    }
-
-    public void setLocationMaps(String locationMaps) {
-        this.locationMaps = locationMaps;
     }
 
     public EStatus getStatus() {

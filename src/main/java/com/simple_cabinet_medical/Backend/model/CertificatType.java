@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class CertificatType extends BasedObject{
@@ -11,8 +8,10 @@ public class CertificatType extends BasedObject{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCertificat;
 
+    @Column(nullable = false)
     private String nomCertificat;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
     public CertificatType(Long idCertificat, String nomCertificat, String text) {

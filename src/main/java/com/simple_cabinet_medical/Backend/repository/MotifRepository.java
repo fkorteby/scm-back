@@ -10,26 +10,29 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface MotifRepository extends JpaRepository<Motif, Long> {
 
+    @PreAuthorize("((#motif.idMotif == null or #motif.idMotif == 0) ? hasPermission(#motif,'WRITE') : hasPermission(#motif,'UPDATE'))")
+    Motif save(Motif motif);
+
     @RestResource(path = "byClient")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
-    Page<Motif> findAllByClientCreatorId(@Param("clientId") Long clientCreatorId, Pageable pageable);
+    Page<Motif> findAllByClientCreatorIdIn(@Param("clientId") Collection<Long> clientCreatorIds, Pageable pageable);
 
     @RestResource(path = "byMotif")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
-    Page<Motif> findByClientCreatorIdAndMotifContainingIgnoreCase(@Param("clientId") Long clientCreatorId, String motif, Pageable pageable);
+    Page<Motif> findByClientCreatorIdInAndMotifContainingIgnoreCase(@Param("clientId") Collection<Long> clientCreatorIds, String motif, Pageable pageable);
 
-    @RestResource(path = "AllbyMotif")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @RestResource(path = "byAllMotif")
     Page<Motif> findByMotifContainingIgnoreCase(String motif, Pageable pageable);
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<Motif> findById(Long aLong);
+
+    @PreAuthorize("hasPermission(#id, 'Motif', 'DELETE')")
+    @Override
+    void deleteById(Long id);
 }

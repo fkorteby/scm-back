@@ -1,6 +1,7 @@
 package com.simple_cabinet_medical.Backend.Mapper.Utilisateur;
 
 import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.model.EStatus;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import org.springframework.stereotype.Component;
 
@@ -11,16 +12,19 @@ public class UtilisateurMapperImp implements UtilisateurMapper{
                 utilisateur.getIdUtilisateur(),
                 utilisateur.getNom(),
                 utilisateur.getPrenom(),
+                utilisateur.getEmail(),
                 utilisateur.getNomUtilisateur(),
                 utilisateur.getRole(),
-                utilisateur.getClient() != null ? utilisateur.getClient().getNomClient() : null
+                utilisateur.getClient() != null ? utilisateur.getClient().getNomClient() : null,
+                utilisateur.getStatus()
         );
         utilisateurDto.setIdUtilisateur(utilisateur.getIdUtilisateur());
         utilisateurDto.setNom(utilisateur.getNom());
         utilisateurDto.setPrenom(utilisateur.getPrenom());
+        utilisateurDto.setEmail(utilisateur.getEmail());
         utilisateurDto.setNomUtilisateur(utilisateur.getNomUtilisateur());
         utilisateurDto.setRole(utilisateur.getRole());
-        utilisateurDto.setClientNom(utilisateur.getClient().getNomClient());
+        utilisateurDto.setStatus(utilisateur.getStatus());
 
         if (utilisateur.getClient() != null) {
             utilisateurDto.setClientNom(utilisateur.getClient().getNomClient());

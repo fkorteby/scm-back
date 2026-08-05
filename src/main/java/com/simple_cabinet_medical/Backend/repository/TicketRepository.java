@@ -1,0 +1,9 @@
+package com.simple_cabinet_medical.Backend.repository;
+
+import com.simple_cabinet_medical.Backend.model.Ticket;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
+}

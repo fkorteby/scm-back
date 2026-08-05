@@ -5,9 +5,12 @@ import java.time.LocalDate;
 public interface ConsultationInfo {
     LocalDate getDateConsultation();
 
+    Long getIdUtilisateur();
     String getDiagnosticMedical();
 
     PatientInfo getPatient();
 
-    String getMotif();
+    String getMotifConsultation();
+
+    String getCatEvolution();
 }

@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
@@ -17,11 +19,13 @@ public abstract class BasedObject {
     @Column(updatable = false)
     protected Long idUtilisateur;
 
-    @Column(name = "client_creator_id", updatable = false)
+    @Column(name = "client_creator_id", nullable = false,updatable = false)
     protected Long clientCreatorId;
 
+    @CreatedDate
     protected Date dateCreation;
 
+    @LastModifiedDate
     protected Date dateModification;
 
     public Long getIdUtilisateur() {

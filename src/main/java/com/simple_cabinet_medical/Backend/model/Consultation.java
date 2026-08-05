@@ -1,6 +1,5 @@
 package com.simple_cabinet_medical.Backend.model;
 
-
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -19,15 +18,23 @@ public class Consultation extends BasedObject implements Serializable {
 
     private EStatusConsultation statusConsultation;
 
+    @Column(columnDefinition = "TEXT")
     private String resultatExamenClinique;
 
+    @Column(columnDefinition = "TEXT")
     private String resultatExamenParacliniques;
 
+    @Column(columnDefinition = "TEXT")
     private String diagnosticMedical;
 
+    @Column(columnDefinition = "TEXT")
     private String traitement;
 
-    private String motifCnsultation;
+    @Column(columnDefinition = "TEXT")
+    private String catEvolution;
+
+    @Column(columnDefinition = "TEXT")
+    private String motifConsultation;
 
     @ManyToOne
     @JoinColumn(name = "client_id")
@@ -37,41 +44,18 @@ public class Consultation extends BasedObject implements Serializable {
     @JoinColumn(name = "patient_id", referencedColumnName = "idPatient")
     private Patient patient;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "consultation_id")
-    private List<Document> documents;
-
-    @ManyToOne
-    @JoinColumn(name = "conduit_id")
-    private Conduite conduite;
-
     @OneToOne(mappedBy = "consultation")
     private RendezVous rendezVous;
 
-    @OneToMany(mappedBy = "consultation")
+    @OneToMany(mappedBy = "consultation",cascade = CascadeType.ALL)
     private List<Traitement> traitements;
 
-    public RendezVous getRendezVous() {
-        return rendezVous;
-    }
-
-    public void setRendezVous(RendezVous rendezVous) {
-        this.rendezVous = rendezVous;
-    }
-
-    public Conduite getConduite() {
-        return conduite;
-    }
-
-    public void setConduite(Conduite conduite) {
-        this.conduite = conduite;
-    }
 
     public Consultation() {
 
     }
 
-    public Consultation(Long idConsultation, LocalDate dateConsultation, EStatusConsultation statusConsultation, String resultatExamenClinique, String resultatExamenParacliniques, String diagnosticMedical, String traitement, String motifCnsultation, Client client, Patient patient, List<Document> documents, Conduite conduite, RendezVous rendezVous, List<Traitement> traitements) {
+    public Consultation(Long idConsultation, LocalDate dateConsultation, EStatusConsultation statusConsultation, String resultatExamenClinique, String resultatExamenParacliniques, String diagnosticMedical, String traitement, String catEvolution, String motifCnsultation, Client client, Patient patient, RendezVous rendezVous, List<Traitement> traitements) {
         this.idConsultation = idConsultation;
         this.dateConsultation = dateConsultation;
         this.statusConsultation = statusConsultation;
@@ -79,72 +63,12 @@ public class Consultation extends BasedObject implements Serializable {
         this.resultatExamenParacliniques = resultatExamenParacliniques;
         this.diagnosticMedical = diagnosticMedical;
         this.traitement = traitement;
-        this.motifCnsultation = motifCnsultation;
+        this.catEvolution = catEvolution;
+        this.motifConsultation = motifCnsultation;
         this.client = client;
         this.patient = patient;
-        this.documents = documents;
-        this.conduite = conduite;
         this.rendezVous = rendezVous;
         this.traitements = traitements;
-    }
-
-    public String getTraitement() {
-        return traitement;
-    }
-
-    public void setTraitement(String traitement) {
-        this.traitement = traitement;
-    }
-
-    public String getMotifCnsultation() {
-        return motifCnsultation;
-    }
-
-    public void setMotifCnsultation(String motifCnsultation) {
-        this.motifCnsultation = motifCnsultation;
-    }
-
-    public EStatusConsultation getStatusConsultation() {
-        return statusConsultation;
-    }
-
-    public void setStatusConsultation(EStatusConsultation statusConsultation) {
-        this.statusConsultation = statusConsultation;
-    }
-
-
-    public List<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(List<Document> documents) {
-        this.documents = documents;
-    }
-
-    public String getMotif() {
-        return motifCnsultation;
-    }
-
-    public void setMotif(String motif) {
-        this.motifCnsultation = motif;
-    }
-
-
-    public Client getClient() {
-        return client;
-    }
-
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
     }
 
     public Long getIdConsultation() {
@@ -163,6 +87,14 @@ public class Consultation extends BasedObject implements Serializable {
         this.dateConsultation = dateConsultation;
     }
 
+    public EStatusConsultation getStatusConsultation() {
+        return statusConsultation;
+    }
+
+    public void setStatusConsultation(EStatusConsultation statusConsultation) {
+        this.statusConsultation = statusConsultation;
+    }
+
     public String getResultatExamenClinique() {
         return resultatExamenClinique;
     }
@@ -179,19 +111,67 @@ public class Consultation extends BasedObject implements Serializable {
         this.resultatExamenParacliniques = resultatExamenParacliniques;
     }
 
-    public List<Traitement> getTraitements() {
-        return traitements;
-    }
-
-    public void setTraitements(List<Traitement> traitements) {
-        this.traitements = traitements;
-    }
-
     public String getDiagnosticMedical() {
         return diagnosticMedical;
     }
 
     public void setDiagnosticMedical(String diagnosticMedical) {
         this.diagnosticMedical = diagnosticMedical;
+    }
+
+    public String getTraitement() {
+        return traitement;
+    }
+
+    public void setTraitement(String traitement) {
+        this.traitement = traitement;
+    }
+
+    public String getCatEvolution() {
+        return catEvolution;
+    }
+
+    public void setCatEvolution(String catEvolution) {
+        this.catEvolution = catEvolution;
+    }
+
+    public String getMotifConsultation() {
+        return motifConsultation;
+    }
+
+    public void setMotifConsultation(String motifCnsultation) {
+        this.motifConsultation = motifCnsultation;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+
+    public RendezVous getRendezVous() {
+        return rendezVous;
+    }
+
+    public void setRendezVous(RendezVous rendezVous) {
+        this.rendezVous = rendezVous;
+    }
+
+    public List<Traitement> getTraitements() {
+        return traitements;
+    }
+
+    public void setTraitements(List<Traitement> traitements) {
+        this.traitements = traitements;
     }
 }

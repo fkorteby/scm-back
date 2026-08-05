@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
@@ -16,10 +13,10 @@ public class Forme extends BasedObject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idForme;
 
-    @NotNull
+    @Column(nullable = false)
     private String forme;
 
-    @NotNull
+    @Column(nullable = false)
     private String abreviation;
 
 

@@ -1,11 +1,10 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.ConsultationsParMoisDTO;
-import com.simple_cabinet_medical.Backend.Dto.RepartitionSexeDTO;
+import com.simple_cabinet_medical.Backend.Dto.Dash.*;
+import com.simple_cabinet_medical.Backend.Mapper.Dash.DashMapper;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import com.simple_cabinet_medical.Backend.model.Patient;
 import com.simple_cabinet_medical.Backend.model.RendezVous;
-import com.simple_cabinet_medical.Backend.repository.ClientRepository;
 import com.simple_cabinet_medical.Backend.repository.ConsultationRepository;
 import com.simple_cabinet_medical.Backend.repository.PatientRepository;
 import com.simple_cabinet_medical.Backend.repository.RendezVousRepository;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class StatistiqueService {
@@ -20,29 +20,33 @@ public class StatistiqueService {
     private final PatientRepository patientRepository;
     private final ConsultationRepository consultationRepository;
     private final RendezVousRepository rendezVousRepository;
+    private final DashMapper dashMapper;
 
     public StatistiqueService(PatientRepository patientRepository,
                               ConsultationRepository consultationRepository,
-                              RendezVousRepository rendezVousRepository) {
+                              RendezVousRepository rendezVousRepository, DashMapper dashMapper) {
         this.patientRepository = patientRepository;
         this.consultationRepository = consultationRepository;
         this.rendezVousRepository = rendezVousRepository;
+        this.dashMapper = dashMapper;
     }
 
-    public int getTotalPatientsByCleint(Long id) {
-        List<Patient> patients = patientRepository.findAllByClientCreatorId(id);
-        return patients.size();
+    public Long getTotalPatientsByCleint(Long id) {
+        return patientRepository.nombrePatientByClient(id);
     }
 
+    public int getTotaleRendezVousAoujourdhuiByCleint(Long id) {
+        return rendezVousRepository.countRendezVousOfTodayByClientCreatorId(id, LocalDate.now())
+                .orElse(0L).intValue();
+    }
     public int getTotalConsultationsByCleint(Long id) {
-        List<Consultation> consultations = consultationRepository.findAllByClientCreatorId(id);
-        return consultations.size();
+        return consultationRepository.countByClientCreatorId(id).orElse(0L).intValue();
     }
 
     public int getTotalPatientsAuj(Long id) {
         // Récupération des consultations du jour
         List<Consultation> totalConsultation =
-                consultationRepository.findAllByClientCreatorIdAndDateConsultation(id, LocalDate.now());
+                consultationRepository.findAllByClientCreatorIdAndDateConsultationOrderByDateConsultationDesc(id, LocalDate.now());
         List<Patient> totalPatientsByCons =
                 totalConsultation.stream().map(Consultation::getPatient).toList();
 
@@ -59,35 +63,68 @@ public class StatistiqueService {
 
         return totalPatients.size();
     }
-
-    public int getTotaleRendezVousAoujourdhuiByCleint(Long id) {
-        List<RendezVous> rendezVousList = rendezVousRepository.findAllByClientCreatorIdAndDateRendezVous(id, LocalDate.now());
-        return rendezVousList.size();
-    }
-
-    public List<ConsultationsParMoisDTO> getConsultationsParMois(Long idClient) {
-        List<Object[]> results = consultationRepository.countConsultationsByMonth(idClient);
-
-        Map<Integer, Long> stats = new LinkedHashMap<>();
-        for (int i = 1; i <= 12; i++) {
-            stats.put(i, 0L);
-        }
-
-        for (Object[] row : results) {
-            Integer mois = ((Number) row[0]).intValue();   // Fix casting
-            Long total = ((Number) row[1]).longValue();    // Fix casting
-            stats.put(mois, total);
-        }
-
-        return stats.entrySet().stream()
-                .map(e -> new ConsultationsParMoisDTO(e.getKey(), e.getValue()))
-                .toList();
+    public List<Object[]> getConsultationsParMois(Long idClient) {
+        return  consultationRepository.getConsultationsParMois(idClient);
     }
 
     public List<RepartitionSexeDTO> getRepartitionParSexe(Long idClient) {
         List<Object[]> results = patientRepository.countPatientsBySexe(idClient);
-        return results.stream()
-                .map(r -> new RepartitionSexeDTO((String) r[0], (Long) r[1]))
-                .toList();
+
+        // Convert query result into a Map for easy lookup
+        Map<String, Long> sexeCounts = results.stream()
+                .collect(Collectors.toMap(
+                        r -> (String) r[0],
+                        r -> (Long) r[1]
+                ));
+
+        // Always include both Homme and Femme
+        List<RepartitionSexeDTO> repartition = new ArrayList<>();
+        repartition.add(new RepartitionSexeDTO("Masculin", sexeCounts.getOrDefault("Masculin", 0L)));
+        repartition.add(new RepartitionSexeDTO("Féminin", sexeCounts.getOrDefault("Féminin", 0L)));
+
+        return repartition;
     }
+
+
+    public List<Object[]> getConsultationsParJour(Long idClient, String period) {
+        LocalDate startDate;
+        LocalDate now = LocalDate.now();
+
+        switch (period.toLowerCase()) {
+            case "week":
+                startDate = now.minusWeeks(1);
+                break;
+            case "month":
+                startDate = now.minusMonths(1);
+                break;
+            case "3months":
+                startDate = now.minusMonths(3);
+                break;
+            case "year":
+                startDate = now.minusYears(1);
+                break;
+            default:
+                startDate = now.minusMonths(1);
+        }
+
+        return consultationRepository.getConsultationsParJour(idClient, startDate);
+    }
+    public List<PatientAujhDto> getPatientAujh(Long idClient){
+        List<Consultation> consultations=this.consultationRepository
+                .findAllByClientCreatorIdAndDateConsultationOrderByDateConsultationDesc(idClient,LocalDate.now());
+        List<PatientAujhDto> patientAujhDtos=consultations.stream().map(consultation ->
+                dashMapper.patientDtoFromConsultation(consultation)).collect(Collectors.toList());
+        return patientAujhDtos;
+    }
+    public List<RenderVousAujhDto> getRendezVousAujh(Long idClient){
+        List<RendezVous> rendezVous=this.rendezVousRepository.findAllByClientCreatorIdAndDateRendezVous(idClient, LocalDate.now());
+        List<RenderVousAujhDto> renderVousAujhDtos=rendezVous.stream().map(rendezVous1 ->
+                dashMapper.rendezVousDtoFromRendezVous(rendezVous1)).collect(Collectors.toList());
+        return renderVousAujhDtos;
+    }
+    public List<Object> getTop10DiagnosticMedical(Long idClient) {
+        List<Object> results = consultationRepository.getTop10DiagnosticMedical(idClient);
+        return results;
+    }
+
 }

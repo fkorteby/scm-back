@@ -11,11 +11,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Optional;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface ClientConfigRepository extends JpaRepository<ClientConfig, Long> {
 
+    @PreAuthorize("((#clientConfig.idClientConfig == null or #clientConfig.idClientConfig == 0) " +
+            "? hasPermission(#clientConfig,'WRITE') : hasPermission(#clientConfig,'UPDATE'))")
+    ClientConfig save(ClientConfig clientConfig);
+
     @RestResource(path = "by-client", rel = "by-client")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<ClientConfig> findClientConfigByClientIdClient(@Param("id") Long id);
+
+    @PreAuthorize("hasPermission(#id, 'ClientConfig', 'DELETE')")
+    @Override
+    void deleteById(Long id);
 }

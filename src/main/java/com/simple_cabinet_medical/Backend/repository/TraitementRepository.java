@@ -11,18 +11,16 @@ import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface TraitementRepository extends JpaRepository<Traitement, Long> {
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT') and (#traitement.idTraitement == null ? hasPermission(#traitement,'WRITE') : hasPermission(#traitement,'UPDATE'))")
+    @PreAuthorize("((#traitement.idTraitement == null or #traitement.idTraitement == 0) ? hasPermission(#traitement,'WRITE') : hasPermission(#traitement,'UPDATE'))")
     Traitement save(Traitement traitement);
 
     @RestResource(path = "by-client", rel = "by-client")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<Traitement> findByClientCreatorId(@Param("clientId") Long clientId, Pageable pageable);
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT') and hasPermission(#id,'Consultation','DELETE')")
+    @PreAuthorize("hasPermission(#id,'Traitement','DELETE')")
     void deleteById(Long id);
 }
 

@@ -13,24 +13,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Optional;
 
 @RepositoryRestResource
-@PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
 @PostFilter("hasPermission(filterObject,'READ')")
 public interface ExamenParacliniqueTypeRepository extends JpaRepository<ExamenParacliniqueType, Long> {
 
+    @PreAuthorize("((#examenParacliniqueType.idExamenParaclinique == null or #examenParacliniqueType.idExamenParaclinique == 0) ? hasPermission(#examenParacliniqueType,'WRITE') : hasPermission(#examenParacliniqueType,'UPDATE'))")
+    ExamenParacliniqueType save(ExamenParacliniqueType examenParacliniqueType);
+
     @RestResource(path = "byClient")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<ExamenParacliniqueType> findAllByClientCreatorId(@Param("clientId") Long clientCreatorId, Pageable pageable);
 
     @RestResource(path = "byName")
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Page<ExamenParacliniqueType> findByClientCreatorIdAndNomExamenParacliniqueContainingIgnoreCase(
-            @Param("clientId") Long clientCreatorId, String nomExamenParaclinique, Pageable pageable);
+            @Param("clientId") Long clientCreatorId,@Param("name") String nomExamenParaclinique, Pageable pageable);
 
     @RestResource(path = "AllbyName")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     Page<ExamenParacliniqueType> findByNomExamenParacliniqueContainingIgnoreCase(String nomExamenParaclinique, Pageable pageable);
 
     @Override
-    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','REMPLACANT','SECRETAIRE')")
     Optional<ExamenParacliniqueType> findById(Long aLong);
+
+    @PreAuthorize("hasPermission(#id, 'ExamenParacliniqueType', 'DELETE')")
+    @Override
+    void deleteById(Long id);
 }

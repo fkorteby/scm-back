@@ -1,38 +1,44 @@
 package com.simple_cabinet_medical.Backend.payload.request;
 
 
+import com.simple_cabinet_medical.Backend.model.EROLE;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class RegisterUserRequest {
 
-    private String nomUtilisateur;
-    private String mdp;
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "Email invalide")
+    private String email;
+
+    @NotBlank(message = "Le Nom est obligatoire")
     private String nom;
+
+    @NotBlank(message = "Le Prenom est obligatoire")
     private String prenom;
-    private String role;
+
+    @NotBlank(message = "Le Role est obligatoire")
+    private EROLE role;
+    @NotBlank(message = "Le client est obligatoire")
     private Long idClient;
 
-    public RegisterUserRequest(String nomUtilisateur, String mdp, String nom, String prenom, String role, Long idClient) {
-        this.nomUtilisateur = nomUtilisateur;
-        this.mdp = mdp;
+    public RegisterUserRequest() {
+    }
+
+    public RegisterUserRequest(String email, String nom, String prenom, EROLE role, Long idClient) {
+        this.email = email;
         this.nom = nom;
         this.prenom = prenom;
         this.role = role;
         this.idClient = idClient;
     }
 
-    public String getNomUtilisateur() {
-        return nomUtilisateur;
+    public String getEmail() {
+        return email;
     }
 
-    public void setNomUtilisateur(String nomUtilisateur) {
-        this.nomUtilisateur = nomUtilisateur;
-    }
-
-    public String getMdp() {
-        return mdp;
-    }
-
-    public void setMdp(String mdp) {
-        this.mdp = mdp;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getNom() {
@@ -51,11 +57,11 @@ public class RegisterUserRequest {
         this.prenom = prenom;
     }
 
-    public String getRole() {
+    public EROLE getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(EROLE role) {
         this.role = role;
     }
 

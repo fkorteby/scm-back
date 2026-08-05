@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class ExamenParacliniqueType extends BasedObject{
@@ -11,8 +8,10 @@ public class ExamenParacliniqueType extends BasedObject{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idExamenParaclinique;
 
+    @Column(nullable = false)
     private String nomExamenParaclinique;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
     public ExamenParacliniqueType(Long idExamenParaclinique, String nomExamenParaclinique, String text) {

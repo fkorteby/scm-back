@@ -11,8 +11,12 @@ public class RendezVous extends BasedObject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRendezVous;
 
+    @Column(nullable = false)
     private LocalDate dateRendezVous;
+
+    @Column(nullable = false)
     private String heureRendezVous;
+
     private String notes;
 
     private EStatusRendezVous statusRendezVous;

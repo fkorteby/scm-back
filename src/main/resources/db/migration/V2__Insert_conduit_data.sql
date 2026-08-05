@@ -1,0 +1,18 @@
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans une semaine');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans 15 jours');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans un mois');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans 3 mois');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans 6 mois');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'A revoir dans une année');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Patient(e) sera revu(e) une fois le bilan demandé fait');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Bilan demandé:');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Patient(e) orienté(e) vers');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Bonne évolution sous TRT');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Echec du TRT');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Patient(e) indiscipliné(e) ne fait pas le régime');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Mauvaise observance du TRT');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Apparition d''effets secondaires');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Patient(e) disparu(e) dans la nature');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Ex. radiologique demandé:');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Résistance au TRT');
+INSERT INTO conduite(client_creator_id, conduite) VALUES (1, 'Rechute');

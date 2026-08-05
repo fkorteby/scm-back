@@ -1,5 +1,6 @@
 package com.simple_cabinet_medical.Backend.utils;
 
+import com.simple_cabinet_medical.Backend.exception.RecaptchaException;
 import com.simple_cabinet_medical.Backend.payload.response.RecaptchaResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class RecaptchaService {
     }
     public boolean validateToken(String token, String expectedAction) {
         if (token == null || token.isEmpty()) {
-            return false;
+            throw new RecaptchaException("Token reCAPTCHA manquant ou invalide.");
         }
 
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
@@ -40,26 +41,24 @@ public class RecaptchaService {
         try {
             RecaptchaResponse response = restTemplate.postForObject(verifyUrl, requestMap, RecaptchaResponse.class);
 
-            if (response == null) {
-                return false;
+            if (response == null || !response.isSuccess()) {
+                throw new RecaptchaException("Échec de la validation reCAPTCHA.");
             }
 
-            if (!response.isSuccess()) {
-                return false;
-            }
             if (expectedAction != null && !expectedAction.equals(response.getAction())) {
-                return false;
+                throw new RecaptchaException("L’action reCAPTCHA ne correspond pas.");
             }
 
-            double score = response.getScore();
-            if (score >= recaptchaThreshold) {
-                return true;
-            } else {
-                return false;
+            if (response.getScore() < recaptchaThreshold) {
+                throw new RecaptchaException("Score reCAPTCHA trop faible : " + response.getScore());
             }
 
+            return true;
+
+        } catch (RecaptchaException e) {
+            throw e;
         } catch (Exception e) {
-            return false;
+            throw new RecaptchaException("Erreur lors de la vérification du reCAPTCHA.");
         }
     }
 }

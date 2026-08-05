@@ -3,33 +3,42 @@ package com.simple_cabinet_medical.Backend.model;
 import jakarta.persistence.*;
 
 @Entity
-public class Traitement extends BasedObject{
+public class Traitement extends BasedObject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTraitement;
 
     @ManyToOne
-    @JoinColumn(name = "medicament_id",referencedColumnName = "idMedicament")
+    @JoinColumn(name = "medicament_id", referencedColumnName = "idMedicament")
     private Medicament medicament;
 
-    @ManyToOne
-    @JoinColumn(name = "duree_id",referencedColumnName = "idDuree")
-    private Duree duree;
+    private String duree;
 
-    @ManyToOne
-    @JoinColumn(name = "posologie_id",referencedColumnName = "idPosologie")
-    private Posologie posologie;
+    private String posologie;
 
     @ManyToOne
     @JoinColumn(name = "idConsultation")
     private Consultation consultation;
 
-    public Traitement(Long idTraitement, Medicament medicament, Duree duree, Posologie posologie, Consultation consultation) {
+    @ManyToOne
+    @JoinColumn(name = "ordonnance_type_id", referencedColumnName = "idOrdonnanceType")
+    private OrdonnanceType ordonnanceType;
+
+    public Traitement(Long idTraitement, Medicament medicament, String duree, String posologie, Consultation consultation, OrdonnanceType ordonnanceType) {
         this.idTraitement = idTraitement;
         this.medicament = medicament;
         this.duree = duree;
         this.posologie = posologie;
         this.consultation = consultation;
+        this.ordonnanceType = ordonnanceType;
+    }
+
+    public OrdonnanceType getOrdonnanceType() {
+        return ordonnanceType;
+    }
+
+    public void setOrdonnanceType(OrdonnanceType ordonnanceType) {
+        this.ordonnanceType = ordonnanceType;
     }
 
     public void setIdTraitement(Long idTraitement) {
@@ -64,19 +73,19 @@ public class Traitement extends BasedObject{
         this.medicament = medicament;
     }
 
-    public Duree getDuree() {
+    public String getDuree() {
         return duree;
     }
 
-    public void setDuree(Duree duree) {
+    public void setDuree(String duree) {
         this.duree = duree;
     }
 
-    public Posologie getPosologie() {
+    public String getPosologie() {
         return posologie;
     }
 
-    public void setPosologie(Posologie posologie) {
+    public void setPosologie(String posologie) {
         this.posologie = posologie;
     }
 }

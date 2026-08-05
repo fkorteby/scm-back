@@ -14,10 +14,8 @@ public class Patient extends BasedObject implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPatient;
 
-    @NonNull
     private String nom;
 
-    @NonNull
     private String prenom;
 
     private LocalDate dateNaissance;
@@ -34,6 +32,14 @@ public class Patient extends BasedObject implements Serializable {
 
     private Boolean assurance;
 
+    private String cin;
+
+    private String numeroSecuriteSociale;
+
+    private String passport;
+
+    private String acteNaissance;
+    
     @Lob
     private String antecedentsPersonnelsMedicaux;
 
@@ -60,7 +66,7 @@ public class Patient extends BasedObject implements Serializable {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<RendezVous> rendezVous;
 
-    public Patient(Long idPatient, @NonNull String nom, @NonNull String prenom, LocalDate dateNaissance, String numeroTel, String situation, String sexe, String adresse, String profession, Boolean assurance, String antecedentsPersonnelsMedicaux, String antecedentsPersonnelsChirugicaux, String antecedentsFamiliaux, String autres, List<Consultation> consultations, List<Document> documents, Client client, List<RendezVous> rendezVous) {
+    public Patient(Long idPatient, String nom, String prenom, LocalDate dateNaissance, String numeroTel, String situation, String sexe, String adresse, String profession, Boolean assurance, String cin, String numeroSecuriteSociale, String passport, String acteNaissance, String antecedentsPersonnelsMedicaux, String antecedentsPersonnelsChirugicaux, String antecedentsFamiliaux, String autres, Client client, List<Consultation> consultations, List<Document> documents, List<RendezVous> rendezVous) {
         this.idPatient = idPatient;
         this.nom = nom;
         this.prenom = prenom;
@@ -71,13 +77,17 @@ public class Patient extends BasedObject implements Serializable {
         this.adresse = adresse;
         this.profession = profession;
         this.assurance = assurance;
+        this.cin = cin;
+        this.numeroSecuriteSociale = numeroSecuriteSociale;
+        this.passport = passport;
+        this.acteNaissance = acteNaissance;
         this.antecedentsPersonnelsMedicaux = antecedentsPersonnelsMedicaux;
         this.antecedentsPersonnelsChirugicaux = antecedentsPersonnelsChirugicaux;
         this.antecedentsFamiliaux = antecedentsFamiliaux;
         this.autres = autres;
+        this.client = client;
         this.consultations = consultations;
         this.documents = documents;
-        this.client = client;
         this.rendezVous = rendezVous;
     }
 
@@ -221,6 +231,38 @@ public class Patient extends BasedObject implements Serializable {
 
     public void setDocuments(List<Document> documents) {
         this.documents = documents;
+    }
+
+    public String getCin() {
+        return cin;
+    }
+
+    public void setCin(String cin) {
+        this.cin = cin;
+    }
+
+    public String getNumeroSecuriteSociale() {
+        return numeroSecuriteSociale;
+    }
+
+    public void setNumeroSecuriteSociale(String numeroSecuriteSociale) {
+        this.numeroSecuriteSociale = numeroSecuriteSociale;
+    }
+
+    public String getPassport() {
+        return passport;
+    }
+
+    public void setPassport(String passport) {
+        this.passport = passport;
+    }
+
+    public String getActeNaissance() {
+        return acteNaissance;
+    }
+
+    public void setActeNaissance(String acteNaissance) {
+        this.acteNaissance = acteNaissance;
     }
 
     public List<RendezVous> getRendezVous() {

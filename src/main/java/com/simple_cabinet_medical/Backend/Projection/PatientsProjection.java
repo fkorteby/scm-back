@@ -11,10 +11,12 @@ public interface PatientsProjection {
     Long getIdPatient();
 
     String getNom();
-
+    Long getIdUtilisateur();
     String getPrenom();
 
     LocalDate getDateNaissance();
+
+    String getSexe();
 
     String getNumeroTel();
 
@@ -29,4 +31,8 @@ public interface PatientsProjection {
     String getAntecedentsFamiliaux();
 
     String getAutres();
+    String getActeNaissance();
+    String getPassport();
+    String getCin();
+    String getNumeroSecuriteSociale();
 }

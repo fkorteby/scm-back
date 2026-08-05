@@ -29,7 +29,6 @@ public interface ConsultationsProjection {
 
     Set<TraitmentInfo> getTraitements();
 
-    String getMotif();
-
-    ConduiteInfo getConduite();
+    String getMotifConsultation();
+    String getCatEvolution();
 }

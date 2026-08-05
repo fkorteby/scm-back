@@ -8,8 +8,13 @@ public interface PatientInfo {
     String getNom();
 
     String getPrenom();
-
+    Long getIdUtilisateur();
     String getSituation();
+
+    String getSexe();
+
+    String getAdresse();
+
 
     LocalDate getDateNaissance();
 
@@ -24,4 +29,8 @@ public interface PatientInfo {
     String getAntecedentsFamiliaux();
 
     String getAutres();
+    String getActeNaissance();
+    String getPassport();
+    String getCin();
+    String getNumeroSecuriteSociale();
 }

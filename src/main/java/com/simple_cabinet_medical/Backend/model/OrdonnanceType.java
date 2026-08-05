@@ -12,10 +12,12 @@ public class OrdonnanceType extends BasedObject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOrdonnanceType;
 
+    @Column(nullable = false)
     private String name;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "ordonnance_Type_id",referencedColumnName = "idOrdonnanceType")
+
+    @OneToMany(mappedBy = "ordonnanceType", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Traitement> traitements;
+
 
     public OrdonnanceType(Long idOrdonnanceType, String name, Set<Traitement> traitements) {
         this.idOrdonnanceType = idOrdonnanceType;

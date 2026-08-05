@@ -1,6 +1,5 @@
 package com.simple_cabinet_medical.Backend.Projection;
 
-import com.simple_cabinet_medical.Backend.model.Forme;
 import com.simple_cabinet_medical.Backend.model.Medicament;
 import org.springframework.data.rest.core.config.Projection;
 
@@ -8,7 +7,11 @@ import org.springframework.data.rest.core.config.Projection;
 public interface MedicamentsProjection {
     Long getIdMedicament();
 
+    Long getClientCreatorId();
+
     String getNomCommerciale();
+
+    Long getIdUtilisateur();
 
     String getDci();
 
@@ -16,5 +19,14 @@ public interface MedicamentsProjection {
 
     String getConditionnement();
 
-    Forme getForme();
+    String getForme();
+
+    String getLaboMedicament();
+
+    String getRemMedicament();
+
+    String getDuree();
+
+    String getPosologie();
+
 }

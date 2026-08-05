@@ -13,7 +13,7 @@ public interface RendezVousProjection {
     LocalDate getDateRendezVous();
 
     String getHeureRendezVous();
-
+    Long getIdUtilisateur();
     String getNotes();
     EStatusRendezVous getStatusRendezVous();
     PatientInfo getPatient();

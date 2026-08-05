@@ -1,6 +1,7 @@
 package com.simple_cabinet_medical.Backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,18 +26,23 @@ public class Utilisateur implements UserDetails {
     @Column(nullable = false,unique = true)
     private String nomUtilisateur;
 
+    @Column(nullable = false,unique = true)
+    private String email;
+
     @Column(nullable = false)
     private String mdp;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EROLE role;
 
     @ManyToOne
-
     @JoinColumn(name = "idClient")
     private Client client;
 
-
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EStatus status = EStatus.ACTIVE;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
@@ -52,6 +58,11 @@ public class Utilisateur implements UserDetails {
     @Override
     public String getUsername() {
         return nomUtilisateur;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status.equals(EStatus.ACTIVE);
     }
 
     public Utilisateur() {
@@ -111,5 +122,20 @@ public class Utilisateur implements UserDetails {
 
     public void setRole(EROLE role) {
         this.role = role;
+    }
+
+    public EStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EStatus status) {
+        this.status = status;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

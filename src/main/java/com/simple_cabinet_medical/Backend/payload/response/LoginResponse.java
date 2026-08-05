@@ -8,14 +8,17 @@ public class LoginResponse {
     private String role;
     private String token;
     private Long client;
+    private Long annonceur;
 
-    public LoginResponse(Long id, String nomUtilisateur, String role, String token, Long client) {
+    public LoginResponse(Long id, String nomUtilisateur, String role, String token, Long client, Long annonceur) {
         this.id = id;
         this.nomUtilisateur = nomUtilisateur;
         this.role = role;
         this.token = token;
         this.client = client;
+        this.annonceur = annonceur;
     }
+
     public LoginResponse(){}
 
     public Long getId() {
@@ -56,5 +59,13 @@ public class LoginResponse {
 
     public void setClient(Long client) {
         this.client = client;
+    }
+
+    public Long getAnnonceur() {
+        return annonceur;
+    }
+
+    public void setAnnonceur(Long annonceur) {
+        this.annonceur = annonceur;
     }
 }

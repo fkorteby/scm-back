@@ -1,7 +1,9 @@
 package com.simple_cabinet_medical.Backend.config;
 
+import com.simple_cabinet_medical.Backend.model.EROLE;
+import com.simple_cabinet_medical.Backend.model.EStatus;
+import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.service.JwtService;
-import com.simple_cabinet_medical.Backend.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,15 +25,14 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private HandlerExceptionResolver handlerExceptionResolver;
+    private final JwtService jwtService;
 
-    @Autowired
-    private JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -39,37 +41,72 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         try {
+            final String authHeader = request.getHeader("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtService.extractNomUtilisateur(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+                if (userDetails instanceof Utilisateur utilisateur) {
+                    if (!utilisateur.getRole().equals(EROLE.ANNONCEUR)){
+                        if (EStatus.INACTIVE.equals(utilisateur.getStatus())
+                                || EStatus.INACTIVE.equals(utilisateur.getClient().getStatus())) {
+
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("""
+                            {"message":"Utilisateur ou client désactivé"}
+                        """);
+                            return;
+                        }
+                    }
+                }
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
                     );
 
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
 
             filterChain.doFilter(request, response);
-        } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+
+        } catch (io.jsonwebtoken.security.SignatureException |
+                 io.jsonwebtoken.ExpiredJwtException |
+                 io.jsonwebtoken.MalformedJwtException e) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {"message":"JWT invalide ou expiré"}
+            """);
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {"message":"Erreur interne du serveur"}
+            """);
         }
     }
 }
