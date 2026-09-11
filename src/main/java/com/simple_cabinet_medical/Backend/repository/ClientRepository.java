@@ -71,10 +71,10 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     @Query("SELECT c.dateCreation FROM Client c WHERE c.dateCreation IS NOT NULL AND c.idClient <> :excludedId")
     List<Date> findAllCreationDates(@Param("excludedId") Long excludedId);
 
-    @Query("SELECT c.ville, c.pays, COUNT(c), SUM(SIZE(c.locals)) " +
+    @Query("SELECT c.wilaya, c.pays, COUNT(c), SUM(SIZE(c.locals)) " +
             "FROM Client c " +
-            "WHERE c.ville IS NOT NULL AND c.pays IS NOT NULL AND c.idClient <> :excludedId " +
-            "GROUP BY c.ville, c.pays " +
+            "WHERE c.wilaya IS NOT NULL AND c.pays IS NOT NULL AND c.idClient <> :excludedId " +
+            "GROUP BY c.wilaya, c.pays " +
             "ORDER BY COUNT(c) DESC")
     List<Object[]> getGeoStatistics(@Param("excludedId") Long excludedId);
 }

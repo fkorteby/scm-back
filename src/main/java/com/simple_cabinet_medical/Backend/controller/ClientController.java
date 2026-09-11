@@ -42,6 +42,13 @@ public class ClientController {
         String url = clientService.clientRegister(request, contentType);
         return new ResponseEntity<>(url, HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/v2/{clientId}")
+    public ResponseEntity<Void> deleteClient(@PathVariable Long clientId){
+        clientService.deleteClient(clientId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping("changeLogo/{id}")
     @PreAuthorize("@authz.canChangeClientProprite(#id)")
     public ResponseEntity<String> changeLogo(

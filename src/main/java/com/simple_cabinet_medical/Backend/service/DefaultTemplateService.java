@@ -15,6 +15,8 @@ import java.util.Map;
 @Service
 public class DefaultTemplateService {
 
+    private final String baseUrl = "https://storage.googleapis.com/scm-logos-prod";
+
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -66,8 +68,8 @@ public class DefaultTemplateService {
             </div>
             """;
 
-    public String generateTemplateForClient(Client client) {
-        String headerHtml = generateDefaultHeaderHtml(client);
+    public String generateTemplateForClient(Client client ,String urlLogo) {
+        String headerHtml = generateDefaultHeaderHtml(client, urlLogo);
         return BASE_DOCUMENT_TEMPLATE.replace("{{HEADER_CONTENT}}", headerHtml);
 //                .replace("{{CURRENT_DATE}}", getCurrentDate());
     }
@@ -214,8 +216,7 @@ public class DefaultTemplateService {
         }
     }
 
-    private String generateDefaultHeaderHtml(Client client) {
-        String logoUrl = getLogoUrl(client);
+    private String generateDefaultHeaderHtml(Client client, String urlLogo) {
         String nomClient = getValueOrEmpty(client.getNomClient());
         String specialite = "Consultation, " + getValueOrEmpty(client.getSpecialite());
         String adresse = getValueOrEmpty(client.getAdresse());
@@ -229,7 +230,7 @@ public class DefaultTemplateService {
         html.append("<div class=\"print-header\" style=\"position: relative; width: auto; height: 100px; overflow: hidden; margin: 0 5px; padding: 0;\">");
 
         html.append("<div style=\"position: absolute; top: 10px; right: 0px; z-index: 20;\">");
-        html.append("<img src=\"").append(logoUrl).append("\" style=\"width: 90px; height: auto; display: block;\">");
+        html.append("<img src=\"").append(urlLogo).append("\" style=\"width: 90px; height: auto; display: block;\">");
         html.append("</div>");
 
         html.append("<div style=\"position: absolute; top: 10px; left: 5px; width: 350px; z-index: 10; display: flex; flex-direction: column; line-height: 1.25;\">");

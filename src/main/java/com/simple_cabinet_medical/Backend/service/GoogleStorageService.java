@@ -119,6 +119,30 @@ public class GoogleStorageService {
         }
     }
 
+    public void deleteConsFiles(String path) {
+
+        if (path == null || path.trim().isEmpty()) {
+            log.warn("Delete failed: invalid path");
+            throw new IllegalArgumentException("Path cannot be null or empty");
+        }
+
+        try {
+            log.info("Starting file deletion: {}", path);
+
+            boolean deleted = storage.delete(bucketName1, path);
+
+            if (deleted) {
+                log.info("File deleted successfully: {}", path);
+            } else {
+                log.warn("File was not deleted or does not exist: {}", path);
+            }
+
+        } catch (Exception e) {
+            log.error("Error while deleting file: {}", path, e);
+            throw e;
+        }
+    }
+
     public String generateUploadUrl(String path, String contentType) {
 
         if (path == null || path.trim().isEmpty()) {
@@ -200,8 +224,8 @@ public class GoogleStorageService {
     }
 
 
-    public List<ExistingFile> listFilesForConsultation(Long consultationId) {
-        String folderPath = "consultations/" + consultationId + "/";
+    public List<ExistingFile> listFilesForConsultation(Long consultationId, Long clientId) {
+        String folderPath = clientId + "/consultations/" + consultationId + "/";
 
         // On liste les blobs avec le préfixe de la consultation
         Page<Blob> blobs = storage.list(bucketName1, Storage.BlobListOption.prefix(folderPath));
@@ -224,5 +248,151 @@ public class GoogleStorageService {
                     return new ExistingFile(fileName, signedUrl.toString());
                 })
                 .collect(Collectors.toList());
+    }
+
+    public void deleteAllFilesByClient(Long clientId){
+        this.deleteLogoByClient(clientId);
+        this.deleteConsultationFilesByClient(clientId);
+    }
+
+    private void deleteConsultationFilesByClient(Long clientId) {
+
+        if (clientId == null) {
+            log.warn("Delete failed: clientId null");
+            throw new IllegalArgumentException("Client Id null");
+        }
+
+        String prefix = clientId + "/";
+
+        try {
+            log.info("Starting deletion of client files with prefix: {}", prefix);
+
+            Iterable<Blob> blobs = storage.list(
+                    bucketName1,
+                    Storage.BlobListOption.prefix(prefix)
+            ).iterateAll();
+
+            int deletedCount = 0;
+
+            for (Blob blob : blobs) {
+
+                String blobName = blob.getName();
+
+                log.debug("Deleting client file: {}", blobName);
+
+                boolean deleted = storage.delete(
+                        bucketName1,
+                        blobName
+                );
+
+                if (deleted) {
+                    deletedCount++;
+                }
+            }
+
+            log.info(
+                    "Client files deletion completed. clientId={}, deletedCount={}",
+                    clientId,
+                    deletedCount
+            );
+
+        } catch (Exception e) {
+            log.error(
+                    "Error while deleting client files for clientId={}",
+                    clientId,
+                    e
+            );
+            throw e;
+        }
+    }
+
+    private void deleteLogoByClient(Long clientId) {
+
+        if (clientId == null) {
+            log.warn("Delete failed: clientId null");
+            throw new IllegalArgumentException("Client Id null");
+        }
+
+        String prefix = clientId + "/";
+
+        try {
+            log.info("Starting logo deletion for prefix: {}", prefix);
+
+            Iterable<Blob> blobs = storage.list(
+                    bucketName,
+                    Storage.BlobListOption.prefix(prefix)
+            ).iterateAll();
+
+            int deletedCount = 0;
+
+            for (Blob blob : blobs) {
+
+                String blobName = blob.getName();
+
+                log.debug("Deleting logo: {}", blobName);
+
+                boolean deleted = storage.delete(
+                        bucketName,
+                        blobName
+                );
+
+                if (deleted) {
+                    deletedCount++;
+                }
+            }
+
+            log.info(
+                    "Logo deletion completed for clientId={}, deletedCount={}",
+                    clientId,
+                    deletedCount
+            );
+
+        } catch (Exception e) {
+            log.error(
+                    "Error while deleting logos for clientId={}",
+                    clientId,
+                    e
+            );
+            throw e;
+        }
+    }
+
+    public void deleteFilesByConsultation(Long clientId, Long consultationId) {
+        if (clientId == null || consultationId == null) {
+            log.warn("Delete failed: clientId or consultationId is null");
+            throw new IllegalArgumentException("Client Id or Consultation Id cannot be null");
+        }
+
+        // Utilisation d'un format propre
+        String prefix = String.format("%d/consultations/%d/", clientId, consultationId);
+
+        try {
+            log.info("Starting deletion of client files with prefix: {}", prefix);
+
+            Iterable<Blob> blobs = storage.list(
+                    bucketName1,
+                    Storage.BlobListOption.prefix(prefix)
+            ).iterateAll();
+
+            int deletedCount = 0;
+
+            for (Blob blob : blobs) {
+                String blobName = blob.getName();
+                log.debug("Deleting file: {}", blobName);
+
+                boolean deleted = storage.delete(bucketName1, blobName);
+                if (deleted) {
+                    deletedCount++;
+                }
+            }
+
+            log.info("Consultation files deletion completed. clientId={}, consultationId={}, deletedCount={}",
+                    clientId, consultationId, deletedCount);
+
+        } catch (Exception e) {
+            log.error("Error while deleting consultation files for clientId={}, consultationId={}",
+                    clientId, consultationId, e);
+            throw e;
+        }
     }
 }

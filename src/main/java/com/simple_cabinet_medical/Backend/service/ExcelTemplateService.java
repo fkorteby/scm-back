@@ -1,9 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.model.Duree;
-import com.simple_cabinet_medical.Backend.model.Forme;
 import com.simple_cabinet_medical.Backend.model.ParametreDefinition;
-import com.simple_cabinet_medical.Backend.model.Posologie;
 import com.simple_cabinet_medical.Backend.repository.DureeRepository;
 import com.simple_cabinet_medical.Backend.repository.FormeRepository;
 import com.simple_cabinet_medical.Backend.repository.ParametreDefinitionRepository;
@@ -79,6 +76,7 @@ public class ExcelTemplateService {
             throw new RuntimeException("Failed to generate Excel template", e);
         }
     }
+
     @Transactional
     public void importExcelData(String type, MultipartFile file) {
         try (InputStream inputStream = file.getInputStream();
@@ -108,7 +106,7 @@ public class ExcelTemplateService {
                 String excelColName = headerRow.getCell(i).getStringCellValue().trim();
                 String dbColLabel = columns.get(i).getColumnLabel().trim();
                 if (!excelColName.equalsIgnoreCase(dbColLabel)) {
-                    throw new RuntimeException("Column mismatch at position " + (i+1) +
+                    throw new RuntimeException("Column mismatch at position " + (i + 1) +
                             ". Expected: '" + dbColLabel + "', Found: '" + excelColName + "'");
                 }
             }

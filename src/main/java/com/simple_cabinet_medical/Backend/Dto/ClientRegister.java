@@ -35,6 +35,7 @@ public class ClientRegister {
     private String adresse;
 
     private String pays;
+    private String wilaya;
     private String ville;
     private String codePostal;
     private String rue;
@@ -47,7 +48,7 @@ public class ClientRegister {
     @Size(max = 100, message = "La spécialité ne doit pas dépasser 100 caractères")
     private String specialite;
 
-    public ClientRegister(String nomClient, String nomClientEnArabe, String nom, String prenom, String email, String telephone, String adresse, String pays, String ville, String codePostal, String rue, int dureeRdv, String heureDebut, String heureFin, LocationMaps locationMaps, String specialite) {
+    public ClientRegister(String nomClient, String nomClientEnArabe, String nom, String prenom, String email, String telephone, String adresse, String pays, String wilaya, String ville, String codePostal, String rue, int dureeRdv, String heureDebut, String heureFin, LocationMaps locationMaps, String specialite) {
         this.nomClient = nomClient;
         this.nomClientEnArabe = nomClientEnArabe;
         this.nom = nom;
@@ -56,6 +57,7 @@ public class ClientRegister {
         this.telephone = telephone;
         this.adresse = adresse;
         this.pays = pays;
+        this.wilaya = wilaya;
         this.ville = ville;
         this.codePostal = codePostal;
         this.rue = rue;
@@ -196,5 +198,13 @@ public class ClientRegister {
 
     public void setLocationMaps(LocationMaps locationMaps) {
         this.locationMaps = locationMaps;
+    }
+
+    public String getWilaya() {
+        return wilaya;
+    }
+
+    public void setWilaya(String wilaya) {
+        this.wilaya = wilaya;
     }
 }

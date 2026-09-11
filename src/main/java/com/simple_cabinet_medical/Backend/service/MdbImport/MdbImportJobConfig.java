@@ -30,7 +30,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 @Configuration
 public class MdbImportJobConfig {
 
-    private static final int CHUNK_SIZE = 50;
+    private static final int CHUNK_SIZE = 100;
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -85,6 +85,7 @@ public class MdbImportJobConfig {
     public Job mdbImportJobV17(Step mdbImportStepV17) {
         return new JobBuilder("mdbImportJobV17", jobRepository)
                 .start(mdbImportStepV17)
+                .listener(new TempFileCleanupListener())
                 .build();
     }
 
@@ -123,6 +124,7 @@ public class MdbImportJobConfig {
     public Job mdbImportJobV10(Step mdbImportStepV10) {
         return new JobBuilder("mdbImportJobV10", jobRepository)
                 .start(mdbImportStepV10)
+                .listener(new TempFileCleanupListener())
                 .build();
     }
 }

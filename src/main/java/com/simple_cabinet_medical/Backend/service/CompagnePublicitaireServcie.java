@@ -65,15 +65,15 @@ public class CompagnePublicitaireServcie {
                 log.info("Début traitement fichier pour la campagne - annonceurId={}, campagneId={}",
                         annonceur.getIdAnnonceur(), savedCompagne.getIdCompagnePub());
 
-                String filePath = fileStorageService.storeVisuelCompangePub(
-                        file,
-                        annonceur.getIdAnnonceur(),
-                        savedCompagne.getIdCompagnePub()
-                );
+//                String filePath = fileStorageService.storeVisuelCompangePub(
+//                        file,
+//                        annonceur.getIdAnnonceur(),
+//                        savedCompagne.getIdCompagnePub()
+//                );
 
-                log.info("Fichier uploadé avec succès : {}", filePath);
-
-                savedCompagne.setFilePath(filePath);
+//                log.info("Fichier uploadé avec succès : {}", filePath);
+//
+//                savedCompagne.setFilePath(filePath);
                 compagnePublicitaireRepository.save(savedCompagne);
 
                 String wilayasMongo = dto.getWilayas() != null
@@ -180,17 +180,17 @@ public class CompagnePublicitaireServcie {
         CompagnePublicitaire compagnePublicitaire = compagnePublicitaireRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Compagne Publicitaire non trouvée avec l'ID : " + id));
 
-        if (file != null && !file.isEmpty()) {
-            String filePath = fileStorageService.storeVisuelCompangePub(
-                    file,
-                    compagnePublicitaire.getAnnonceur().getIdAnnonceur(),
-                    id
-            );
-            compagnePublicitaire.setLien(filePath);
-            compagnePublicitaireRepository.save(compagnePublicitaire);
-        } else {
-            log.warn("Aucun fichier fourni ...");
-        }
+//        if (file != null && !file.isEmpty()) {
+//            String filePath = fileStorageService.storeVisuelCompangePub(
+//                    file,
+//                    compagnePublicitaire.getAnnonceur().getIdAnnonceur(),
+//                    id
+//            );
+//            compagnePublicitaire.setLien(filePath);
+//            compagnePublicitaireRepository.save(compagnePublicitaire);
+//        } else {
+//            log.warn("Aucun fichier fourni ...");
+//        }
     }
 
 }

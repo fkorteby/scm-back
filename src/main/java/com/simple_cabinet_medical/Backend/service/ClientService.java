@@ -23,7 +23,6 @@ public class ClientService {
     private final String baseUrl = "https://storage.googleapis.com/scm-logos-prod";
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
-    private final FileStorageService fileStorageService;
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurService utilisateurService;
     private final PasswordEncoder passwordEncoder;
@@ -35,10 +34,9 @@ public class ClientService {
     private final ObjectMapper objectMapper;
     private final ClientConfigRepository clientConfigRepository;
 
-    public ClientService(ClientRepository clientRepository, ClientMapper clientMapper, FileStorageService fileStorageService, UtilisateurRepository utilisateurRepository, UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, EmailService emailService, OTPSerivce otpSerivce, DefaultTemplateService defaultTemplateService, LocalRepository localRepository, GoogleStorageService gcsService, ObjectMapper objectMapper, ClientConfigRepository clientConfigRepository) {
+    public ClientService(ClientRepository clientRepository, ClientMapper clientMapper, UtilisateurRepository utilisateurRepository, UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, EmailService emailService, OTPSerivce otpSerivce, DefaultTemplateService defaultTemplateService, LocalRepository localRepository, GoogleStorageService gcsService, ObjectMapper objectMapper, ClientConfigRepository clientConfigRepository) {
         this.clientRepository = clientRepository;
         this.clientMapper = clientMapper;
-        this.fileStorageService = fileStorageService;
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurService = utilisateurService;
         this.passwordEncoder = passwordEncoder;
@@ -96,6 +94,7 @@ public class ClientService {
             client.setAdresse(clientReq.getAdresse());
             client.setPays(clientReq.getPays());
             client.setVille(clientReq.getVille());
+            client.setWilaya(clientReq.getWilaya());
             client.setRue(clientReq.getRue());
             client.setCodePostal(clientReq.getCodePostal());
             client.setSpecialite(clientReq.getSpecialite());
@@ -121,7 +120,7 @@ public class ClientService {
                     client.getNomClient(),
                     extension
             );
-            String path = baseUrl + '/' + fileName;
+            String path = baseUrl + '/' + '/' + fileName;
             ClientConfig config = buildDefaultClientConfig(client,clientReq,path);
             config.setClient(client);
 
@@ -177,6 +176,13 @@ public class ClientService {
         emailService.sendPasswordAndUserName(utilisateur, tempPassword);
         return clientMapper.EntityToDto(updatedClient);
     }
+
+    @Transactional
+    public void deleteClient(Long clientId){
+        clientRepository.deleteById(clientId);
+        gcsService.deleteAllFilesByClient(clientId);
+    }
+
     private Local buildDefaultLocal(Client client, ClientRegister clientReq) {
         Local local = new Local();
         local.setClient(client);
@@ -215,7 +221,7 @@ public class ClientService {
         config.setUseDefaultConduit(true);
         config.setUseDefaultParClinique(true);
         config.setUseDefaultOptionPatClinique(true);
-        String htmlContent = defaultTemplateService.generateTemplateForClient(client);
+        String htmlContent = defaultTemplateService.generateTemplateForClient(client,path);
         String headerJson = defaultTemplateService.generateDefaultHeaderJson(client,path);
         config.setHeaderConfigJson(headerJson);
         config.setHtmlContent(htmlContent);
@@ -299,18 +305,12 @@ public class ClientService {
     }
 
     private String buildLogoPath(Long clientId, String clientName, String extension) {
-
         String cleanName = clientName
                 .toLowerCase()
                 .trim()
                 .replaceAll("[^a-z0-9]", "_");
 
-
-        return  cleanName
-                + "_"
-                + clientId
-                + "_logo."
-                + extension;
+        return String.format("%d/%s_%d_logo.%s", clientId, cleanName, clientId, extension);
     }
 
 

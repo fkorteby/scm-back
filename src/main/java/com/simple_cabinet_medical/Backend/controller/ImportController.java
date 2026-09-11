@@ -3,6 +3,7 @@ package com.simple_cabinet_medical.Backend.controller;
 import com.simple_cabinet_medical.Backend.service.MdbImport.MdbVersionDetector;
 import com.simple_cabinet_medical.Backend.service.MdbImport.MdbVersionDetector.MdbVersion;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +21,18 @@ import java.util.Map;
 public class ImportController {
 
     private final JobLauncher jobLauncher;
+    private final JobExplorer jobExplorer;
     private final Job mdbImportJobV17;
     private final Job mdbImportJobV10;
     private final MdbVersionDetector versionDetector;
 
     public ImportController(JobLauncher jobLauncher,
+                            JobExplorer jobExplorer,
                             @Qualifier("mdbImportJobV17") Job mdbImportJobV17,
                             @Qualifier("mdbImportJobV10") Job mdbImportJobV10,
                             MdbVersionDetector versionDetector) {
         this.jobLauncher = jobLauncher;
+        this.jobExplorer = jobExplorer;
         this.mdbImportJobV17 = mdbImportJobV17;
         this.mdbImportJobV10 = mdbImportJobV10;
         this.versionDetector = versionDetector;
@@ -38,12 +41,14 @@ public class ImportController {
     /**
      * POST /api/import/mdb
      *
-     * Détecte automatiquement la version depuis le contenu du fichier, puis
-     * lance le Job Spring Batch correspondant (streaming, adapté aux gros
-     * volumes). Le fichier temporaire doit rester présent pendant TOUTE la
-     * durée du Job (le reader garde une connexion JDBC dessus) : on ne le
-     * supprime qu'après jobLauncher.run(...) qui est synchrone (bloque
-     * jusqu'à la fin du Job avec le JobLauncher par défaut de Spring Boot).
+     * Lance le Job en ASYNCHRONE (voir BatchAsyncConfig) et répond
+     * IMMÉDIATEMENT avec l'ID du JobExecution — la requête HTTP ne reste plus
+     * ouverte pendant toute la durée de l'import (c'était la cause du 502
+     * Apache en prod : le reverse proxy coupait avant la fin du Job).
+     *
+     * Le fichier temporaire n'est PLUS supprimé ici (le Job est encore en
+     * train de le lire en arrière-plan) : c'est TempFileCleanupListener qui
+     * s'en charge une fois le Job réellement terminé.
      */
     @PostMapping("/mdb")
     public ResponseEntity<?> importMdb(
@@ -51,11 +56,10 @@ public class ImportController {
             @RequestParam                    Long          clientId,
             @RequestParam(defaultValue = "") String        password
     ) {
-        File temp = null;
         String mdbPassword = (password != null && !password.isBlank()) ? password : "farouk123456";
 
         try {
-            temp = File.createTempFile("mdb-import-", ".mdb");
+            File temp = File.createTempFile("mdb-import-", ".mdb");
             file.transferTo(temp);
 
             MdbVersion version = versionDetector.detectFromContent(temp.getAbsolutePath(), mdbPassword);
@@ -69,26 +73,51 @@ public class ImportController {
                     .addString("filePath", temp.getAbsolutePath())
                     .addString("password", mdbPassword)
                     .addLong("clientId", clientId)
-                    // paramètre technique pour que Spring Batch considère chaque
-                    // import comme une nouvelle exécution de Job (sinon, mêmes
-                    // paramètres = mêmes fichiers réimportés = "JobInstanceAlreadyCompleteException")
                     .addLong("runId", System.currentTimeMillis())
                     .toJobParameters();
 
-            JobExecution execution = jobLauncher.run(job, params);
+            JobExecution execution = jobLauncher.run(job, params); // retourne immédiatement (async)
 
-            return ResponseEntity.ok(buildResponse(version, execution));
+            return ResponseEntity.accepted().body(Map.of(
+                    "jobExecutionId", execution.getId(),
+                    "versionDetectee", version.name(),
+                    "statut", execution.getStatus().toString()
+            ));
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("erreur", e.getMessage()));
-        } finally {
-            if (temp != null) {
-                try { Files.deleteIfExists(temp.toPath()); } catch (Exception ignored) {}
-            }
         }
     }
 
-    private Map<String, Object> buildResponse(MdbVersion version, JobExecution execution) {
+    /**
+     * GET /api/import/mdb/status/{jobExecutionId}
+     *
+     * A interroger périodiquement (polling) depuis le frontend tant que
+     * "termine" est false. Une fois termine=true, "resultat" contient les
+     * mêmes champs qu'avant (patientsImportes, erreurs, etc.).
+     */
+    @GetMapping("/mdb/status/{jobExecutionId}")
+    public ResponseEntity<?> importStatus(@PathVariable Long jobExecutionId) {
+        JobExecution execution = jobExplorer.getJobExecution(jobExecutionId);
+        if (execution == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean termine = !execution.isRunning();
+
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("jobExecutionId", jobExecutionId);
+        body.put("statut", execution.getStatus().toString());
+        body.put("termine", termine);
+
+        if (termine) {
+            body.put("resultat", buildResultPayload(execution));
+        }
+
+        return ResponseEntity.ok(body);
+    }
+
+    private Map<String, Object> buildResultPayload(JobExecution execution) {
         int patientsImported = 0, patientsFailed = 0, consultationsImported = 0, traitementsImported = 0;
         List<String> errors = new ArrayList<>();
 
@@ -104,7 +133,6 @@ public class ImportController {
         }
 
         return Map.of(
-                "versionDetectee", version.name(),
                 "statutJob", execution.getStatus().toString(),
                 "patientsImportes", patientsImported,
                 "patientsEchoues", patientsFailed,

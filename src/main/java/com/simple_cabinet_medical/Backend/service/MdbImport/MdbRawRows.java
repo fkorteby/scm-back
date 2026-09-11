@@ -18,7 +18,7 @@ public final class MdbRawRows {
 
     /** Commun aux 2 versions. conduite/trait2 sont null pour la v1.0. */
     public record RawConsultation(long numCons, long numMal, Date dateCons, String motif, String diag,
-                                  String rsltExamen, String rsltPara, String conduite,
+                                  String rsltExamen, String rsltPara, String conduite_cons,
                                   String traitCons, String trait2Cons) {
     }
 

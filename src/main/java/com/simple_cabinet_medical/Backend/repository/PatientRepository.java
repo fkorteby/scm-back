@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
                 WHERE p.clientCreatorId = :clientId
                   AND (
                        LOWER(p.nom) LIKE LOWER(CONCAT('%', :items, '%'))
+                    OR LOWER(p.prenom) LIKE LOWER(CONCAT('%', :items, '%'))
                     OR p.numeroTel LIKE CONCAT(:items, '%')
                     OR LOWER(p.cin) LIKE LOWER(CONCAT('%', :items, '%'))
                     OR LOWER(p.numeroSecuriteSociale) LIKE LOWER(CONCAT('%', :items, '%'))
@@ -55,7 +57,17 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
                 order by p.nom,p.prenom ASC""")
     Page<Patient> findPatientByClientAndRendezVousAujourdhui(
             @Param("clientId") Long clientId,
-            @Param("date") Date date,
+            @Param("date") @DateTimeFormat(pattern = "MM/dd/yyyy") Date date,
+            Pageable pageable);
+
+    @RestResource(path = "byConsultationAujh", rel = "byConsultationAujh")
+    @Query(""" 
+            SELECT p FROM Patient p JOIN p.consultations c 
+            WHERE p.clientCreatorId = :clientId AND c.dateConsultation = :date 
+            ORDER BY p.nom, p.prenom ASC""")
+    Page<Patient> findPatientByClientAndConsultationAujourdhui(
+            @Param("clientId") Long clientId,
+            @Param("date") @DateTimeFormat(pattern = "MM/dd/yyyy") LocalDate date,
             Pageable pageable);
 
     @Query("SELECT p.sexe, COUNT(p.idPatient) " +
@@ -67,7 +79,9 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @RestResource(path = "byAllPatient", rel = "byAllPatient")
     @Query("""
                 SELECT p FROM Patient p
-                WHERE LOWER(p.nom) LIKE LOWER(CONCAT('%', :items, '%'))
+                WHERE 
+                      LOWER(p.nom) LIKE LOWER(CONCAT('%', :items, '%'))
+                   OR LOWER(p.prenom) LIKE LOWER(CONCAT('%', :items, '%'))
                    OR p.numeroTel LIKE CONCAT(:items, '%')
                    OR LOWER(p.cin) LIKE LOWER(CONCAT('%', :items, '%'))
                    OR LOWER(p.numeroSecuriteSociale) LIKE LOWER(CONCAT('%', :items, '%'))
@@ -79,12 +93,12 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     @RestResource(path = "byAllPatientAujh", rel = "byAllPatientAujh")
     @Query(""" 
-                SELECT p FROM Patient p JOIN p.rendezVous r 
-                WHERE CAST(r.dateRendezVous AS date) = CAST(:date AS date)
-                order by p.nom,p.prenom ASC               
-                                                    """)
+            SELECT p FROM Patient p JOIN p.consultations c 
+            WHERE c.dateConsultation = :date 
+            ORDER BY p.nom, p.prenom ASC               
+            """)
     Page<Patient> findPatientByRendezVousAujourdhui(
-            @Param("date") Date date,
+            @Param("date") @DateTimeFormat(pattern = "MM/dd/yyyy") LocalDate date,
             Pageable pageable);
 
     List<Patient> findAllByClientCreatorIdOrderByNomAscPrenomAsc(Long id);

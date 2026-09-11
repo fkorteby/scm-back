@@ -1,0 +1,11 @@
+services:
+  backend:
+    image: simple-cabinet-medical:1.0.0
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - BATCH_INITIALIZE_SCHEMA=never
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json
+    volumes:
+      - ./secrets/key.json:/secrets/key.json:ro

@@ -51,17 +51,17 @@ public class StatistiqueService {
                 totalConsultation.stream().map(Consultation::getPatient).toList();
 
         // Récupération des rendez-vous du jour
-        List<RendezVous> totalRendezVous =
-                rendezVousRepository.findAllByClientCreatorIdAndDateRendezVous(id, LocalDate.now());
-        List<Patient> totalPatientsByRendezVous =
-                totalRendezVous.stream().map(RendezVous::getPatient).toList();
+//        List<RendezVous> totalRendezVous =
+//                rendezVousRepository.findAllByClientCreatorIdAndDateRendezVous(id, LocalDate.now());
+//        List<Patient> totalPatientsByRendezVous =
+//                totalRendezVous.stream().map(RendezVous::getPatient).toList();
 
         // Fusion sans doublons
-        Set<Patient> totalPatients = new HashSet<>();
-        totalPatients.addAll(totalPatientsByCons);
-        totalPatients.addAll(totalPatientsByRendezVous);
+//        Set<Patient> totalPatients = new HashSet<>();
+//        totalPatients.addAll(totalPatientsByCons);
+//        totalPatients.addAll(totalPatientsByRendezVous);
 
-        return totalPatients.size();
+        return totalPatientsByCons.size();
     }
     public List<Object[]> getConsultationsParMois(Long idClient) {
         return  consultationRepository.getConsultationsParMois(idClient);

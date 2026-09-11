@@ -2,6 +2,8 @@ package com.simple_cabinet_medical.Backend.repository;
 
 import com.simple_cabinet_medical.Backend.Dto.Dash.ConsultationsParMoisDTO;
 import com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO;
+import com.simple_cabinet_medical.Backend.Dto.RapportSummaryPatientsDTO;
+import com.simple_cabinet_medical.Backend.Dto.RapportSummaryProjection;
 import com.simple_cabinet_medical.Backend.Projection.ConsultationsProjection;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import org.springframework.data.domain.Page;
@@ -341,10 +343,40 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             @Param("dateFin")   LocalDate dateFin
     );
 
+    @Query(value = """
+    SELECT 
+        COUNT(DISTINCT p.id_patient) AS total,
+        COALESCE(SUM(CASE WHEN lower(p.sexe) = 'masculin' THEN 1 ELSE 0 END), 0) AS masculin,
+        COALESCE(SUM(CASE WHEN lower(p.sexe) = 'féminin' THEN 1 ELSE 0 END), 0) AS feminin,
+        COALESCE(SUM(CASE WHEN p.assurance = true THEN 1 ELSE 0 END), 0) AS assures,
+        COALESCE(SUM(CASE WHEN p.assurance = false OR p.assurance IS NULL THEN 1 ELSE 0 END), 0) AS non_assures
+    FROM consultation c
+    JOIN patient p ON c.patient_id = p.id_patient
+    WHERE c.client_creator_id = :clientId
+      AND (:dateDebut  IS NULL OR c.date_consultation >= CAST(:dateDebut  AS date))
+      AND (:dateFin    IS NULL OR c.date_consultation <= CAST(:dateFin    AS date))
+      AND (:diagnostic     IS NULL OR lower(c.diagnostic_medical::text)      LIKE lower('%' || :diagnostic     || '%'))
+      AND (:motif          IS NULL OR lower(c.motif_consultation::text)       LIKE lower('%' || :motif          || '%'))
+      AND (:examenClinique IS NULL OR lower(c.resultat_examen_clinique::text) LIKE lower('%' || :examenClinique || '%'))
+      AND (:catEvolution   IS NULL OR lower(c.cat_evolution::text)            LIKE lower('%' || :catEvolution   || '%'))
+    """,
+            nativeQuery = true)
+    RapportSummaryProjection getRapportPatientsStats(
+            @Param("clientId")       Long clientId,
+            @Param("dateDebut")      String dateDebut,
+            @Param("dateFin")        String dateFin,
+            @Param("diagnostic")     String diagnostic,
+            @Param("motif")          String motif,
+            @Param("examenClinique") String examenClinique,
+            @Param("catEvolution")   String catEvolution
+    );
+
     Integer countAllByPatientIdPatient(Long patientIdPatient);
 
     // Admin Dash -------------------
     long countByClient_IdClientNot(Long id);
 
     long countByDateConsultationAndClient_IdClientNot(LocalDate dateConsultation, Long id);
+
+    void deleteConsultationByIdConsultation(Long consultationId);
 }

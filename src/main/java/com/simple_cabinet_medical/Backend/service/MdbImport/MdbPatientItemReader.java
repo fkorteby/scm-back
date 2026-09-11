@@ -7,6 +7,8 @@ import com.simple_cabinet_medical.Backend.service.MdbImport.ImportRowPersister.C
 import com.simple_cabinet_medical.Backend.service.MdbImport.MdbRawRows.RawConsultation;
 import com.simple_cabinet_medical.Backend.service.MdbImport.MdbRawRows.RawPatient;
 import com.simple_cabinet_medical.Backend.service.MdbImport.MdbRawRows.RawPresc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamReader;
@@ -19,27 +21,30 @@ import java.util.regex.*;
 /**
  * Reader pour les fichiers MDB v1.7.
  *
- * CORRECTION IMPORTANTE (suite à un bug constaté en prod) : la version
- * précédente faisait un merge-join en flux sur 3 curseurs triés (mal / cons /
- * presc), en supposant que "ORDER BY num_mal" produit EXACTEMENT le même
- * ordre relatif dans "mal" et dans "cons". Sur cette base Access (dont on
- * sait déjà que les métadonnées sont partiellement corrompues), cette
- * hypothèse s'est révélée fausse : le tri n'est pas fiable/stable de la même
- * façon sur les deux tables, donc le merge-join "loupait" silencieusement
- * quasiment tous les rattachements consultation/traitement, sans lever la
- * moindre erreur (d'où l'import "rapide" mais avec 0 consultation).
+ * CORRECTION 1 (colonnes optionnelles) : certains fichiers .mdb de cette
+ * "version 1.7" n'ont en réalité PAS toutes les colonnes attendues (ex:
+ * trait2_cons absente sur certains fichiers clients). Avant, seules
+ * conduite_cons et autres_mal étaient protégées par hasColumn(...) ; le reste
+ * plantait le Job entier avec une HsqlException "Column not found" dès la
+ * première ligne. Maintenant TOUTES les colonnes optionnelles sont谁 vérifiées
+ * une seule fois à l'ouverture (pas à chaque ligne, pour la performance), et
+ * une colonne absente => on continue simplement sans cette donnée, jamais de
+ * crash du Job pour ça.
+ * crash du Job pour ça.
  *
- * RETOUR À UNE APPROCHE PLUS ROBUSTE : préchargement en Map, groupé par clé
- * (num_mal / num_cons), fait UNE SEULE FOIS à l'ouverture du reader. Ça reste
- * 2 scans complets de "cons"/"presc" (pas de N+1), mais ça ne dépend plus
- * d'aucune hypothèse sur l'ordre de tri — un HashMap regroupe correctement
- * peu importe l'ordre dans lequel les lignes arrivent.
- *
- * Le reader continue de streamer un patient à la fois via mal (read()
- * appelé par Spring Batch), donc la mémoire du Job reste dominée par la
- * taille de cons+presc préchargés (raw DTOs légers), pas par les entités JPA.
+ * CORRECTION 2 (priorité des traitements) : avant, on regardait D'ABORD la
+ * table presc, et seulement si elle ne contenait rien pour cette consultation
+ * on repliait sur trait_cons/trait2_cons. Maintenant c'est l'inverse, comme
+ * demandé : on essaie D'ABORD de parser trait_cons/trait2_cons ; si ça donne
+ * au moins un traitement, on s'arrête là (pas besoin d'aller chercher dans
+ * presc) ; seulement si trait_cons est vide/ne donne rien, on va chercher
+ * dans presc.
  */
 public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit> {
+
+    private static final Logger log = LoggerFactory.getLogger(MdbPatientItemReader.class);
+    private static final int MAX_UNPARSED_LOGS = 30;
+    private int unparsedLogCount = 0;
 
     private final String filePath;
     private final String password;
@@ -57,6 +62,11 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
 
     private Client client;
     private Map<String, Medicament> medicamentCache;
+
+    // Colonnes détectées une seule fois à l'ouverture (voir open())
+    private boolean hasAutresMal;
+    private boolean hasConduiteCons;
+    private boolean hasTrait2Cons;
 
     private static final Pattern EXTRACT_CROCHET =
             Pattern.compile("^(.+?)\\s*\\[([^\\]]+)\\]\\s*$");
@@ -90,6 +100,10 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
                 medicamentCache.put(cacheKey(m.getNomCommerciale(), m.getDosage()), m);
             }
 
+            hasAutresMal    = tableHasColumn("mal", "autres_mal");
+            hasConduiteCons = tableHasColumn("cons", "conduite_cons");
+            hasTrait2Cons   = tableHasColumn("cons", "trait2_cons");
+
             boolean hasPrescTable = tableExists("presc");
 
             // ── Préchargement (2 scans complets, une seule fois) ─────────────
@@ -111,15 +125,14 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM cons")) {
 
-            boolean hasConduite = hasColumn(rs, "conduite_cons");
-
             while (rs.next()) {
                 RawConsultation rc = new RawConsultation(
                         rs.getLong("num_cons"), rs.getLong("num_mal"), rs.getDate("date_cons"),
                         rs.getString("motif_cons"), rs.getString("diag_cons"),
                         rs.getString("rslt_examen_cons"), rs.getString("rslt_para_cons"),
-                        hasConduite ? rs.getString("conduite_cons") : null,
-                        rs.getString("trait_cons"), rs.getString("trait2_cons")
+                        hasConduiteCons ? rs.getString("conduite_cons") : null,
+                        rs.getString("trait_cons"),
+                        hasTrait2Cons ? rs.getString("trait2_cons") : null
                 );
                 map.computeIfAbsent(rc.numMal(), k -> new ArrayList<>()).add(rc);
             }
@@ -156,31 +169,80 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         List<RawConsultation> rawConsultations = consultationsByPatient.getOrDefault(rp.numMal(), Collections.emptyList());
 
         for (RawConsultation rc : rawConsultations) {
-            List<Traitement> traitements = new ArrayList<>();
-            List<RawPresc> prescRows = prescByConsultation.get(rc.numCons());
-
-            if (prescRows != null && !prescRows.isEmpty()) {
-                for (RawPresc rpx : prescRows) {
-                    String medicBrut = clean(rpx.medic());
-                    if (medicBrut == null || medicBrut.isBlank()) continue;
-
-                    Medicament med = getOrCreateMedicamentDirect(
-                            extractNom(medicBrut), extractDosage(medicBrut), rpx.forme(), rpx.poso());
-                    traitements.add(buildTraitement(med, rpx.duree(), rpx.poso()));
-                }
-            } else {
-                String raw = (rc.traitCons() != null ? rc.traitCons() : "")
-                        + (rc.trait2Cons() != null ? " " + rc.trait2Cons() : "");
-                for (TraitementParser.ParsedTraitement pt : TraitementParser.parse(raw)) {
-                    Medicament med = getOrCreateMedicament(pt);
-                    traitements.add(buildTraitement(med, pt.duree, pt.posologie));
-                }
-            }
-
-            units.add(new ConsultationUnit(buildConsultation(rc), traitements));
+            Consultation c = buildConsultation(rc);
+            List<Traitement> traitements = resolveTraitements(rc, c);
+            units.add(new ConsultationUnit(c, traitements));
         }
 
         return new PatientImportUnit(rp.numMal(), patient, units);
+    }
+
+    /**
+     * Logique à 3 niveaux, appliquée INDÉPENDAMMENT pour chaque consultation
+     * (donc une base qui mélange des consultations "ancien style" trait_cons
+     * et des consultations "nouveau style" presc est gérée correctement,
+     * ligne par ligne — ce n'est jamais un choix global pour tout le fichier) :
+     *
+     *  1. On essaie de PARSER trait_cons/trait2_cons (format structuré
+     *     "NOM[DOSAGE] forme (durée" + posologie en ligne suivante).
+     *     Si ça donne au moins un traitement -> terminé pour cette consultation.
+     *
+     *  2. Sinon, on regarde la table presc pour cette consultation (num_cons).
+     *     Si elle contient des lignes -> terminé.
+     *
+     *  3. Sinon, si trait_cons contenait quand même du texte (mais du texte
+     *     LIBRE, tapé à la main, qui ne respecte pas le format structuré —
+     *     ex: "ANTAG 20 +SORBITOL AMP+LIBRAX 1 COM /J+ METEOXANE") -> on ne
+     *     tente PAS de le parser comme un médicament structuré (on se
+     *     tromperait), on le stocke TEL QUEL sur le champ texte libre de la
+     *     consultation, pour ne rien perdre. Aucun Traitement structuré n'est
+     *     créé dans ce cas (pas de Medicament à rattacher de façon fiable).
+     */
+    private List<Traitement> resolveTraitements(RawConsultation rc, Consultation c) {
+        List<Traitement> traitements = new ArrayList<>();
+
+        String raw = (rc.traitCons() != null ? rc.traitCons() : "")
+                + (rc.trait2Cons() != null ? " " + rc.trait2Cons() : "");
+
+        for (TraitementParser.ParsedTraitement pt : TraitementParser.parse(raw)) {
+            Medicament med = getOrCreateMedicament(pt);
+            traitements.add(buildTraitement(med, pt.duree, pt.posologie));
+        }
+
+        if (!traitements.isEmpty()) {
+            return traitements; // trouvé dans trait_cons -> pas besoin de presc
+        }
+
+        List<RawPresc> prescRows = prescByConsultation.get(rc.numCons());
+        if (prescRows != null) {
+            for (RawPresc rpx : prescRows) {
+                String medicBrut = clean(rpx.medic());
+                if (medicBrut == null || medicBrut.isBlank()) continue;
+
+                Medicament med = getOrCreateMedicamentDirect(
+                        extractNom(medicBrut), extractDosage(medicBrut), rpx.forme(), rpx.poso());
+                traitements.add(buildTraitement(med, rpx.duree(), rpx.poso()));
+            }
+        }
+
+        if (!traitements.isEmpty()) {
+            return traitements; // trouvé dans presc -> terminé
+        }
+
+        // Ni trait_cons structuré, ni presc : si trait_cons contenait quand
+        // même du texte libre, on le conserve tel quel sur la consultation.
+        if (!raw.isBlank()) {
+            c.setTraitement(raw.trim());
+
+            if (unparsedLogCount < MAX_UNPARSED_LOGS) {
+                unparsedLogCount++;
+                String sample = raw.length() > 150 ? raw.substring(0, 150) + "…" : raw;
+                log.info("[import-mdb] num_cons={} : trait_cons en texte libre (non structuré), conservé tel quel. Aperçu : {}",
+                        rc.numCons(), sample.replace("\n", " \\n "));
+            }
+        }
+
+        return traitements;
     }
 
     @Override
@@ -205,7 +267,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
                 rs.getDate("ddn_mal"), rs.getString("adr_mal"), rs.getString("tel_mal"),
                 rs.getString("sexe_mal"), rs.getString("sit_fam_mal"), rs.getString("profession_mal"),
                 rs.getString("assurance_mal"), rs.getString("ant_med_mal"), rs.getString("ant_chir_mal"),
-                rs.getString("ant_fam_mal"), hasColumn(rs, "autres_mal") ? rs.getString("autres_mal") : null
+                rs.getString("ant_fam_mal"), hasAutresMal ? rs.getString("autres_mal") : null
         );
     }
 
@@ -234,11 +296,11 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
     private Consultation buildConsultation(RawConsultation rc) {
         Consultation c = new Consultation();
         c.setDateConsultation(rc.dateCons() != null ? rc.dateCons().toLocalDate() : LocalDate.now());
-        c.setMotifConsultation(firstNonBlank(rc.motif(), "-"));
-        c.setDiagnosticMedical(firstNonBlank(rc.diag(), "-"));
+        c.setMotifConsultation(rc.motif());
+        c.setDiagnosticMedical(rc.diag());
         c.setResultatExamenClinique(rc.rsltExamen());
         c.setResultatExamenParacliniques(rc.rsltPara());
-        c.setCatEvolution(rc.conduite());
+        c.setCatEvolution(rc.conduite_cons());
         c.setClientCreatorId(clientId);
         c.setStatusConsultation(EStatusConsultation.TERMINEE);
         return c;
@@ -322,12 +384,14 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         }
     }
 
-    private boolean hasColumn(ResultSet rs, String columnName) {
-        try {
-            rs.findColumn(columnName);
-            return true;
-        } catch (SQLException e) {
-            return false;
+    /**
+     * Vérifie si une colonne existe dans une table, via les métadonnées JDBC
+     * (pas besoin d'ouvrir un ResultSet sur les données). Utilisé UNE SEULE
+     * FOIS à l'ouverture pour chaque colonne optionnelle — pas de coût par ligne.
+     */
+    private boolean tableHasColumn(String tableName, String columnName) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getColumns(null, null, tableName, columnName)) {
+            return rs.next();
         }
     }
 
@@ -339,11 +403,6 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
     }
 
     private String clean(String v) { return v == null ? null : v.trim(); }
-
-    private String firstNonBlank(String... vs) {
-        for (String v : vs) if (v != null && !v.isBlank()) return v.trim();
-        return "";
-    }
 
     private String normalizeSexe(String sexe) {
         if (sexe == null) return null;

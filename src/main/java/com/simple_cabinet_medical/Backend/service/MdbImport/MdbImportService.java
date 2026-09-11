@@ -222,8 +222,8 @@ public class MdbImportService {
     private Consultation buildConsultation(RawConsultation rc, Long clientId) {
         Consultation c = new Consultation();
         c.setDateConsultation(rc.dateCons() != null ? rc.dateCons().toLocalDate() : LocalDate.now());
-        c.setMotifConsultation(firstNonBlank(rc.motif(), "-"));
-        c.setDiagnosticMedical(firstNonBlank(rc.diag(), "-"));
+        c.setMotifConsultation(rc.motif());
+        c.setDiagnosticMedical(rc.diag());
         c.setResultatExamenClinique(rc.rsltExamen());
         c.setResultatExamenParacliniques(rc.rsltPara());
         c.setCatEvolution(rc.conduite());

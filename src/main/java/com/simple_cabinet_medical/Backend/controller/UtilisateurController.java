@@ -1,6 +1,8 @@
 package com.simple_cabinet_medical.Backend.controller;
 
+import com.simple_cabinet_medical.Backend.Dto.ChatUserDto;
 import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
 import com.simple_cabinet_medical.Backend.service.UtilisateurService;
 import org.springframework.data.domain.Page;
@@ -8,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,6 +62,16 @@ public class UtilisateurController {
     @PutMapping("/{id}")
     public ResponseEntity<UtilisateurDto> updateUser(@PathVariable Long id, @RequestBody RegisterUserRequest request) {
         UtilisateurDto updatedUser = utilisateurService.updateUser(id, request);
-        return ResponseEntity.ok(updatedUser);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    @GetMapping("user-chat-info")
+    public ResponseEntity<ChatUserDto> getUserInfoforChat(
+            @AuthenticationPrincipal Utilisateur utilisateur) {
+
+        ChatUserDto chatUserDto =
+                utilisateurService.getUserInfoforChat(utilisateur.getNomUtilisateur());
+
+        return ResponseEntity.ok(chatUserDto);
     }
 }

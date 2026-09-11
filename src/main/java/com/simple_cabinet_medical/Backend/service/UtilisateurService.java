@@ -1,5 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
+import com.simple_cabinet_medical.Backend.Dto.ChatUserDto;
 import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
 import com.simple_cabinet_medical.Backend.Mapper.Utilisateur.UtilisateurMapper;
 import com.simple_cabinet_medical.Backend.model.EStatus;
@@ -10,10 +11,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 @Service
 public class UtilisateurService {
+
+//    @Value("${chatwoot.identity-validation-secret}")
+    private String chatwootSecret = "pjMFgAvUzeFzTs721UB3rbdq";
 
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
@@ -46,6 +55,12 @@ public class UtilisateurService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur not found"));
         return utilisateurMapper.EntityToDto(utilisateur);
     }
+
+    public Utilisateur getUtilisateurByUserName(String userName) {
+        return utilisateurRepository.findByNomUtilisateur(userName)
+                .orElseThrow(() -> new RuntimeException("Utilisateur not found"));
+    }
+
     public void delete(Long id) {
         utilisateurRepository.deleteById(id);
     }
@@ -84,5 +99,44 @@ public class UtilisateurService {
                 .toLowerCase();
 //                .replaceAll("\\s+", "")
 //                .replaceAll("[^a-zA-Z0-9.]", "");
+    }
+
+    public ChatUserDto getUserInfoforChat(String userName) {
+        Utilisateur user = utilisateurRepository.findByNomUtilisateur(userName)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String identifierHash = generateIdentifierHash(user.getIdUtilisateur().toString());
+
+        return new ChatUserDto(
+                user.getIdUtilisateur(),
+                user.getClient().getNomClient(),
+                user.getEmail(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getClient().getTelephone(),
+                user.getNomUtilisateur(),
+                user.getRole().toString(),
+                identifierHash
+        );
+    }
+
+    private String generateIdentifierHash(String identifier) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(
+                    chatwootSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKey);
+            byte[] hashBytes = mac.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException("Erreur génération identifier_hash Chatwoot", e);
+        }
     }
 }

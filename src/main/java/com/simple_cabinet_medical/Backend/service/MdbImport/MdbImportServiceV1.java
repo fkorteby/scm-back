@@ -74,11 +74,11 @@ public class MdbImportServiceV1 {
     private Map<Long, List<RawConsultation>> preloadConsultations(Connection conn) throws SQLException {
         Map<Long, List<RawConsultation>> map = new HashMap<>();
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM cons ORDER BY num_mal, id_cons")) {
+             ResultSet rs = stmt.executeQuery("SELECT * FROM cons ORDER BY num_mal, num_cons")) {
 
             while (rs.next()) {
                 RawConsultation rc = new RawConsultation(
-                        rs.getLong("id_cons"),
+                        rs.getLong("num_cons"),
                         rs.getLong("num_mal"),
                         rs.getDate("date_cons"),
                         rs.getString("motif_cons"),
@@ -123,7 +123,7 @@ public class MdbImportServiceV1 {
                     consultationUnits.add(new ConsultationUnit(c, traitements));
 
                 } catch (Exception e) {
-                    result.addError("Consultation id_cons=" + rc.idCons() + " (patient num_mal=" + numMal
+                    result.addError("Consultation id_cons=" + rc.numCons() + " (patient num_mal=" + numMal
                             + ") ignorée : " + ImportErrorFormatter.describe(e));
                 }
             }
@@ -172,8 +172,8 @@ public class MdbImportServiceV1 {
     private Consultation buildConsultation(RawConsultation rc, Long clientId) {
         Consultation c = new Consultation();
         c.setDateConsultation(rc.dateCons() != null ? rc.dateCons().toLocalDate() : LocalDate.now());
-        c.setMotifConsultation(firstNonBlank(rc.motif(), "-"));
-        c.setDiagnosticMedical(firstNonBlank(rc.diag(), "-"));
+        c.setMotifConsultation(rc.motif());
+        c.setDiagnosticMedical(rc.diag());
         c.setResultatExamenClinique(rc.rsltExamen());
         c.setResultatExamenParacliniques(rc.rsltPara());
         c.setCatEvolution(null);
@@ -271,7 +271,7 @@ public class MdbImportServiceV1 {
 
     // ─── DTO interne de préchargement ──────────────────────────────────────────
 
-    private record RawConsultation(long idCons, long numMal, java.sql.Date dateCons,
+    private record RawConsultation(long numCons, long numMal, java.sql.Date dateCons,
                                    String motif, String diag, String rsltExamen, String rsltPara,
                                    String traitCons) {
     }

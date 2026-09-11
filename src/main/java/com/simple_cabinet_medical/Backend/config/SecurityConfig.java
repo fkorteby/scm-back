@@ -39,7 +39,9 @@ public class SecurityConfig {
                     corsConfig.setAllowedOriginPatterns(List.of(
                             "http://localhost:4200",
                             "https://app.simple-cabinet-medical.com",
-                            "https://vps159368.vps.ovh.ca"
+                            "https://vps159368.vps.ovh.ca",
+                            "https://simple-cabinet-medical.web.app",
+                            "*"
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                     corsConfig.setAllowedHeaders(List.of("*"));
@@ -70,9 +72,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/webjars/**",
                                 "/swagger-ui.html",
-                                "/actuator/**",
-                                "/hawtio/**",      // ← add this
-                                "/jolokia/**"
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -45,20 +45,20 @@ public class CompagnePublicitaireController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/visuel")
-    public ResponseEntity<Resource> getVisuelByPath(@RequestParam("path") String path, HttpServletRequest request) {
-        Resource resource = fileStorageService.loadFileAsResource(path);
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-        }
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
-    }
+//    @GetMapping("/visuel")
+//    public ResponseEntity<Resource> getVisuelByPath(@RequestParam("path") String path, HttpServletRequest request) {
+//        Resource resource = fileStorageService.loadFileAsResource(path);
+//        String contentType = null;
+//        try {
+//            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+//        } catch (IOException ex) {
+//        }
+//        if (contentType == null) {
+//            contentType = "application/octet-stream";
+//        }
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.parseMediaType(contentType))
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+//                .body(resource);
+//    }
 }

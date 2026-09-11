@@ -7,7 +7,9 @@ import com.simple_cabinet_medical.Backend.repository.PatientRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -101,35 +103,44 @@ public class AdminDashboardService {
     }
 
     public DoctorEvolutionDto getDoctorEvolution() {
-        int currentYear = LocalDate.now().getYear();
+        LocalDate now = LocalDate.now();
+        // Définir la date de début : il y a 11 mois (pour avoir un total de 12 mois incluant le mois en cours)
+        LocalDate startDate = now.minusMonths(11).withDayOfMonth(1);
 
         // Récupérer toutes les dates de création (hors compte admin)
         List<Date> allDates = clientRepository.findAllCreationDates(ADMIN_CLIENT_ID);
 
-        // Filtrer l'année en Java et compter par mois (1 à 12)
-        Map<Integer, Long> monthlyCounts = new HashMap<>();
+        // Compter par YearMonth pour les 12 derniers mois
+        Map<YearMonth, Long> monthlyCounts = new HashMap<>();
         for (Date date : allDates) {
             LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            if (localDate.getYear() == currentYear) {
-                int month = localDate.getMonthValue();
-                monthlyCounts.put(month, monthlyCounts.getOrDefault(month, 0L) + 1);
+
+            // Filtrer pour garder uniquement les dates comprises dans les 12 derniers mois
+            if (!localDate.isBefore(startDate) && !localDate.isAfter(now)) {
+                YearMonth ym = YearMonth.from(localDate);
+                monthlyCounts.put(ym, monthlyCounts.getOrDefault(ym, 0L) + 1);
             }
         }
-
-        // Libellés des mois en français
-        String[] monthNames = {"Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"};
 
         List<String> labels = new ArrayList<>();
         List<Long> data = new ArrayList<>();
 
-        for (int i = 1; i <= 12; i++) {
-            labels.add(monthNames[i - 1]);
-            data.add(monthlyCounts.getOrDefault(i, 0L));
+        // Formatteur pour afficher le mois et l'année (ex: "août 2025")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy", Locale.FRENCH);
+
+        // Générer dynamiquement les 12 derniers mois
+        YearMonth currentYearMonth = YearMonth.from(startDate);
+        YearMonth endYearMonth = YearMonth.from(now);
+
+        while (!currentYearMonth.isAfter(endYearMonth)) {
+            labels.add(currentYearMonth.format(formatter));
+            data.add(monthlyCounts.getOrDefault(currentYearMonth, 0L));
+            currentYearMonth = currentYearMonth.plusMonths(1);
         }
 
         return new DoctorEvolutionDto(
                 "Évolution des inscriptions",
-                "Nouveaux médecins inscrits par mois",
+                "Nouveaux médecins inscrits sur les 12 derniers mois",
                 labels,
                 data
         );
@@ -148,7 +159,7 @@ public class AdminDashboardService {
         // 2. Construire la liste des DTOs
         List<GeoStatDto> stats = new ArrayList<>();
         for (Object[] row : rawData) {
-            String city = (String) row[0];
+            String wilaya = (String) row[0]; // Récupération de la wilaya
             String country = (String) row[1];
             long doctorCount = ((Number) row[2]).longValue();
 
@@ -162,7 +173,7 @@ public class AdminDashboardService {
             }
             percentage = Math.round(percentage * 10.0) / 10.0; // Arrondi à 1 chiffre après la virgule
 
-            stats.add(new GeoStatDto(city, country, doctorCount, cabinetCount, percentage));
+            stats.add(new GeoStatDto(wilaya, country, doctorCount, cabinetCount, percentage));
         }
 
         return new GeoKpiResponseDto(

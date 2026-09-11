@@ -80,7 +80,7 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
 
             while (rs.next()) {
                 RawConsultation rc = new RawConsultation(
-                        rs.getLong("id_cons"), rs.getLong("num_mal"), rs.getDate("date_cons"),
+                        rs.getLong("num_cons"), rs.getLong("num_mal"), rs.getDate("date_cons"),
                         rs.getString("motif_cons"), rs.getString("diag_cons"),
                         rs.getString("rslt_examen_cons"), rs.getString("rslt_para_cons"),
                         null, rs.getString("trait_cons"), null
@@ -168,8 +168,8 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
     private Consultation buildConsultation(RawConsultation rc) {
         Consultation c = new Consultation();
         c.setDateConsultation(rc.dateCons() != null ? rc.dateCons().toLocalDate() : LocalDate.now());
-        c.setMotifConsultation(firstNonBlank(rc.motif(), "-"));
-        c.setDiagnosticMedical(firstNonBlank(rc.diag(), "-"));
+        c.setMotifConsultation(rc.motif());
+        c.setDiagnosticMedical(rc.diag());
         c.setResultatExamenClinique(rc.rsltExamen());
         c.setResultatExamenParacliniques(rc.rsltPara());
         c.setCatEvolution(null);

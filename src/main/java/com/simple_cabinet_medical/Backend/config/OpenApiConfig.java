@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                         description = "Local ENV",
                         url = "http://localhost:8080"
                 ),
-                @Server( // ✅ BLOC AJOUTÉ POUR LA PRODUCTION
+                @Server(
                         description = "Production ENV",
                         url = "http://vps159368.vps.ovh.ca:8080"
                 )

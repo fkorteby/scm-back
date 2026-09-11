@@ -31,6 +31,7 @@ public class Client {
     @Column(unique = true)
     private String adresse;
     private String pays;
+    private String wilaya;
     private String ville;
     private String codePostal;
     private String rue;
@@ -81,7 +82,7 @@ public class Client {
     @JoinColumn(name = "client_config_id",referencedColumnName = "idClientConfig")
     private ClientConfig clientConfig;
 
-    public Client(Long idClient, String nomClient, String nomClientEnArabe, String email, String contact, String adresse, String pays, String ville, String codePostal, String rue, String telephone, String mobile, String site, String numeroAgrement, String description, EStatus status, String image, String specialite, EmailVerificationStatus emailVerificationStatus, Set<Local> locals, Set<Utilisateur> utilisateurs, Set<Patient> patients, Set<Consultation> consultations, ClientConfig clientConfig) {
+    public Client(Long idClient, String nomClient, String nomClientEnArabe, String email, String contact, String adresse, String pays, String wilaya, String ville, String codePostal, String rue, String telephone, String mobile, String site, String numeroAgrement, String description, EStatus status, String image, String specialite, EmailVerificationStatus emailVerificationStatus, Date dateCreation, Set<Local> locals, Set<Utilisateur> utilisateurs, Set<Patient> patients, Set<Consultation> consultations, ClientConfig clientConfig) {
         this.idClient = idClient;
         this.nomClient = nomClient;
         this.nomClientEnArabe = nomClientEnArabe;
@@ -89,6 +90,7 @@ public class Client {
         this.contact = contact;
         this.adresse = adresse;
         this.pays = pays;
+        this.wilaya = wilaya;
         this.ville = ville;
         this.codePostal = codePostal;
         this.rue = rue;
@@ -101,6 +103,7 @@ public class Client {
         this.image = image;
         this.specialite = specialite;
         this.emailVerificationStatus = emailVerificationStatus;
+        this.dateCreation = dateCreation;
         this.locals = locals;
         this.utilisateurs = utilisateurs;
         this.patients = patients;
@@ -302,5 +305,21 @@ public class Client {
 
     public void setRue(String rue) {
         this.rue = rue;
+    }
+
+    public String getWilaya() {
+        return wilaya;
+    }
+
+    public void setWilaya(String wilaya) {
+        this.wilaya = wilaya;
+    }
+
+    public Date getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(Date dateCreation) {
+        this.dateCreation = dateCreation;
     }
 }

@@ -1,0 +1,44 @@
+-- -- ============================================================
+-- -- Notification indexes
+-- -- ============================================================
+--
+-- -- Permet de rechercher rapidement les notifications
+-- -- par date de création.
+-- CREATE INDEX idx_notification_date_creation
+--     ON notification (date_creation);
+--
+--
+-- -- Permet de rechercher rapidement les notifications
+-- -- par type.
+-- CREATE INDEX idx_notification_type
+--     ON notification (type);
+--
+--
+-- -- Permet de rechercher rapidement les notifications
+-- -- par client.
+-- CREATE INDEX idx_notification_client
+--     ON notification (client_id);
+--
+--
+-- -- ============================================================
+-- -- NotificationTarget indexes
+-- -- ============================================================
+--
+-- -- Recherche des notifications d'un utilisateur.
+-- CREATE INDEX idx_notification_target_user
+--     ON notification_target (user_id);
+--
+--
+-- -- Recherche des utilisateurs ciblés par une notification.
+-- CREATE INDEX idx_notification_target_notification
+--     ON notification_target (notification_id);
+--
+--
+-- -- Recherche des notifications non lues d'un utilisateur.
+-- CREATE INDEX idx_notification_target_user_read
+--     ON notification_target (user_id, read);
+--
+--
+-- -- Recherche des notifications push non envoyées.
+-- CREATE INDEX idx_notification_target_push_sent
+--     ON notification_target (push_sent);

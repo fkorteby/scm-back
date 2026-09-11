@@ -1,14 +1,15 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@Document(collection = "ads")
+@Entity
+@Table
 public class Ads {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idAds;
     private String adTitle;
     private String adDescription;

@@ -1,14 +1,15 @@
 package com.simple_cabinet_medical.Backend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "impression_pub")
+@Entity
+@Table
 public class ImpressionPub {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idImpressionPub;
 
     @Column(nullable = false)
