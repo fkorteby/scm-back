@@ -4,8 +4,14 @@ import jakarta.persistence.*;
 
 @Entity
 public class Traitement extends BasedObject {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "traitement_seq")
+    @SequenceGenerator(
+            name = "traitement_seq",
+            sequenceName = "traitement_id_seq",
+            allocationSize = 1
+    )
     private Long idTraitement;
 
     @ManyToOne

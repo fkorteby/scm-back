@@ -39,8 +39,8 @@ public class SecurityConfig {
                     corsConfig.setAllowedOriginPatterns(List.of(
                             "http://localhost:4200",
                             "https://app.simple-cabinet-medical.com",
+                            "https://app-dev.simple-cabinet-medical.com",
                             "https://vps159368.vps.ovh.ca",
-                            "https://simple-cabinet-medical.web.app",
                             "*"
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

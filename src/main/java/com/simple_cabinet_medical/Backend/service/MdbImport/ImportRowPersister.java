@@ -16,24 +16,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Persiste le "bloc" complet d'un patient : le patient lui-même, toutes ses
- * consultations, et tous les traitements de ces consultations — en UNE seule
+ * Persists a patient's whole "tree" — the patient itself, all of its
+ * consultations, and all treatments of those consultations — in ONE single
  * transaction (REQUIRES_NEW).
  *
- * Pourquoi une transaction par patient (et pas par ligne, ni une seule transaction
- * globale) :
- *  - Une seule transaction globale : la moindre ligne en erreur, sur des millions
- *    de lignes, annule tout l'import. Inacceptable.
- *  - Une transaction par ligne (patient, puis chaque consultation, puis chaque
- *    traitement séparément) : correct mais beaucoup trop de commits sur une grosse
- *    base (des millions de transactions), donc très lent.
- *  - Une transaction par PATIENT (ce fichier) : bon compromis. Si un patient a un
- *    souci réel de contrainte BDD au moment du flush, on perd CE patient et son
- *    arborescence (consultations + traitements), mais tous les autres patients
- *    continuent d'être importés normalement. Comme tu retires les contraintes sur
- *    la table patient, ce cas doit devenir rare : le patient passe presque toujours,
- *    et l'essentiel du filtrage (patient introuvable, consultation introuvable)
- *    est déjà fait AVANT d'arriver ici (voir MdbImportService / MdbImportServiceV1).
+ * <p>Why one transaction per patient (and not per row, nor one global
+ * transaction for the whole import):
+ * <ul>
+ *   <li>One single global transaction: a single failing row, out of
+ *       potentially millions, rolls back the entire import. Unacceptable.</li>
+ *   <li>One transaction per row (patient, then each consultation, then each
+ *       treatment separately): correct but far too many commits on a large
+ *       database (millions of transactions) — very slow.</li>
+ *   <li>One transaction per PATIENT (this class): good compromise. If a
+ *       patient hits a real DB constraint issue at flush time, only THAT
+ *       patient and its subtree (consultations + treatments) is lost, while
+ *       every other patient keeps importing normally.</li>
+ * </ul>
+ *
+ * <p><b>Performance note (see SPRING_BATCH_GUIDE.md §4.1):</b> consultations
+ * are now saved with a single {@code saveAll(...) + flush()} for the whole
+ * patient, instead of one {@code saveAndFlush} per consultation. Flushing
+ * once lets Hibernate group the INSERT statements into a real JDBC batch
+ * (governed by {@code hibernate.jdbc.batch_size}) rather than sending one
+ * round trip per consultation. This only works if the entity's
+ * {@code @GeneratedValue} strategy is NOT {@code IDENTITY} — check
+ * {@code Patient}/{@code Consultation}/{@code Traitement} use
+ * {@code GenerationType.SEQUENCE} instead, otherwise Hibernate silently
+ * disables batching regardless of this change.
  */
 @Service
 public class ImportRowPersister {
@@ -54,11 +64,11 @@ public class ImportRowPersister {
     }
 
     /**
-     * Un médicament est une donnée partagée/globale (clientCreatorId=1L, cache
-     * commun) — indépendante de la réussite ou de l'échec d'un patient donné.
-     * On la sauvegarde donc dans SA PROPRE petite transaction, séparée du bloc
-     * patient : si le patient échoue plus tard, le médicament déjà créé reste
-     * (c'est sans conséquence, juste une entrée de catalogue en plus).
+     * A treatment/drug is shared/global reference data (clientCreatorId=1L,
+     * shared cache) — independent from whether a given patient ultimately
+     * succeeds or fails. It is therefore saved in ITS OWN small transaction,
+     * separate from the patient block: if the patient fails later, the drug
+     * already created is kept (harmless — just one extra catalog entry).
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Medicament saveMedicament(Medicament m) {
@@ -66,24 +76,34 @@ public class ImportRowPersister {
     }
 
     /**
-     * Sauvegarde patient + consultations + traitements comme un seul bloc.
-     * Si une exception survient n'importe où là-dedans (contrainte BDD, etc.),
-     * TOUT le bloc est annulé (rollback automatique de la transaction REQUIRES_NEW),
-     * et l'exception remonte à l'appelant pour être journalisée proprement.
+     * Saves patient + consultations + treatments as a single block. If an
+     * exception occurs anywhere in here (DB constraint, etc.), the WHOLE
+     * block is rolled back (automatic rollback of the REQUIRES_NEW
+     * transaction), and the exception propagates to the caller to be logged.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PatientImportOutcome savePatientTree(Patient patient, List<ConsultationUnit> consultationUnits) {
-        Patient savedPatient = patientRepository.saveAndFlush(patient);
+        // Sequence-generated IDs are assigned at persist() time, so
+        // savedPatient.getId() is already available here without a flush —
+        // no need to force a round trip just to link consultations to it.
+        Patient savedPatient = patientRepository.save(patient);
 
-        int consultationsSaved = 0;
-        List<Traitement> allTraitements = new ArrayList<>();
-
+        List<Consultation> consultationsToPersist = new ArrayList<>(consultationUnits.size());
         for (ConsultationUnit unit : consultationUnits) {
             unit.consultation().setPatient(savedPatient);
-            Consultation savedConsultation = consultationRepository.saveAndFlush(unit.consultation());
-            consultationsSaved++;
+            consultationsToPersist.add(unit.consultation());
+        }
 
-            for (Traitement t : unit.traitements()) {
+        // Single batched flush for every consultation of this patient
+        // (was previously one flush per consultation in the loop, which
+        // defeated Hibernate's JDBC batching entirely).
+        List<Consultation> savedConsultations = consultationRepository.saveAll(consultationsToPersist);
+        consultationRepository.flush();
+
+        List<Traitement> allTraitements = new ArrayList<>();
+        for (int i = 0; i < consultationUnits.size(); i++) {
+            Consultation savedConsultation = savedConsultations.get(i);
+            for (Traitement t : consultationUnits.get(i).traitements()) {
                 t.setConsultation(savedConsultation);
                 allTraitements.add(t);
             }
@@ -91,18 +111,21 @@ public class ImportRowPersister {
 
         if (!allTraitements.isEmpty()) {
             traitementRepository.saveAll(allTraitements);
+            // No explicit flush needed: nothing else in this transaction
+            // needs these rows to already be visible, so let the
+            // REQUIRES_NEW transaction commit flush them.
         }
 
-        return new PatientImportOutcome(consultationsSaved, allTraitements.size());
+        return new PatientImportOutcome(savedConsultations.size(), allTraitements.size());
     }
 
-    // ─── Structures de transport (préparées AVANT la transaction, en lecture seule) ─
+    // ─── Transport structures (built BEFORE the transaction, read-only) ────
 
-    /** Une consultation prête à être persistée, avec ses traitements déjà résolus. */
+    /** A consultation ready to be persisted, with its treatments already resolved. */
     public record ConsultationUnit(Consultation consultation, List<Traitement> traitements) {
     }
 
-    /** Résultat chiffré de la sauvegarde d'un bloc patient. */
-    public record PatientImportOutcome(int consultationsSaved, int traitementsSaved) {
+    /** Numeric result of persisting one patient block. */
+    public record PatientImportOutcome(int consultationsSaved, int treatmentsSaved) {
     }
 }

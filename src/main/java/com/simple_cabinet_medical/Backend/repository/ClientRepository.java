@@ -27,12 +27,16 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Client save(Client client);
 
     boolean existsByEmail(String email);
+
     boolean existsByTelephone(String telephone);
+
     boolean existsByNomClient(String nomClient);
+
     boolean existsByNomClientEnArabe(String nomClient);
+
     boolean existsByAdresse(String add);
 
-//    @Override
+    //    @Override
 //    @PostFilter("hasPermission(filterObject,'READ')")
 //    @PreAuthorize("hasAnyAuthority('ADMIN', 'MEDECIN', 'REMPLACANT', 'SECRETAIRE','MEDECIN_PRINCIPAL')")
     Optional<Client> findById(Long aLong);
@@ -43,10 +47,12 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     void deleteById(Long id);
 
     @Override
-    @PostFilter("hasPermission(filterObject,'READ')")
+   // @PostFilter("hasPermission(filterObject,'READ')")
+    //@PreAuthorize("hasAnyAuthority('ADMIN')")
     Page<Client> findAll(Pageable pageable);
 
-    @PostFilter("hasPermission(filterObject,'READ')")
+    //@PostFilter("hasPermission(filterObject,'READ')")
+  //  @PreAuthorize("hasAnyAuthority('ADMIN')")
     @RestResource(path = "by-nom", rel = "by-nom")
     Page<Client> findAllByNomClientContainingIgnoreCase(@NotBlank String nomClient, Pageable pageable);
 
@@ -56,10 +62,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     long countByIdClientNot(Long id);
 
     long countByDateCreationAfterAndIdClientNot(Date startDate, Long id);
-
-    @Query("SELECT COUNT(DISTINCT c) FROM Client c JOIN c.consultations con " +
-            "WHERE con.dateConsultation >= :startDate AND c.idClient <> :excludedId")
-    long countActiveDoctorsSince(@Param("startDate") LocalDate startDate, @Param("excludedId") Long excludedId);
 
     @Query("SELECT FUNCTION('MONTH', c.dateCreation), COUNT(c) " +
             "FROM Client c " +

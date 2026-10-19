@@ -4,13 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Curseur "avec un coup d'avance" (peek) au-dessus d'un ResultSet JDBC (forward-only).
- * Nécessaire pour faire un merge-join manuel entre plusieurs curseurs triés
- * (mal / cons / presc) sans jamais charger une table entière en mémoire :
- * on ne garde que la ligne courante de chaque flux.
+ * A "one row lookahead" (peek) cursor on top of a forward-only JDBC
+ * ResultSet. Needed to do a manual merge-join between several sorted
+ * cursors (mal / cons / presc) without ever loading a whole table into
+ * memory: only the current row of each stream is kept.
  *
- * Usage : tant que peek() correspond à la clé qu'on traite, on consume() et
- * on avance ; dès que la clé change, on passe au groupe suivant.
+ * Usage: as long as peek() matches the key currently being processed,
+ * consume() and advance; as soon as the key changes, move to the next group.
  */
 public class RowCursor<T> {
 
@@ -39,12 +39,12 @@ public class RowCursor<T> {
         }
     }
 
-    /** Ligne courante, sans avancer. Null si le flux est épuisé. */
+    /** Current row, without advancing. Null if the stream is exhausted. */
     public T peek() {
         return buffered;
     }
 
-    /** Retourne la ligne courante et avance au suivant. */
+    /** Returns the current row and advances to the next one. */
     public T consume() throws SQLException {
         T value = buffered;
         advance();

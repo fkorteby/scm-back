@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.*;
+import com.simple_cabinet_medical.Backend.dto.*;
 import com.simple_cabinet_medical.Backend.Mapper.Patient.PatientMapperImp;
 import com.simple_cabinet_medical.Backend.model.Patient;
 import com.simple_cabinet_medical.Backend.repository.ConsultationRepository;

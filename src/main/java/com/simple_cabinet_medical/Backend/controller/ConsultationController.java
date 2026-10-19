@@ -1,10 +1,10 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO;
-import com.simple_cabinet_medical.Backend.Dto.ExistingFile;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryPatientsDTO;
-import com.simple_cabinet_medical.Backend.Dto.files.UpdateFilesRequest;
-import com.simple_cabinet_medical.Backend.Dto.files.UpdateFilesResponse;
+import com.simple_cabinet_medical.Backend.dto.DiagnosticDTO;
+import com.simple_cabinet_medical.Backend.dto.ExistingFile;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryPatientsDTO;
+import com.simple_cabinet_medical.Backend.dto.files.UpdateFilesRequest;
+import com.simple_cabinet_medical.Backend.dto.files.UpdateFilesResponse;
 import com.simple_cabinet_medical.Backend.service.ConsultationService;
 import com.simple_cabinet_medical.Backend.service.FileStorageService;
 import com.simple_cabinet_medical.Backend.service.GoogleStorageService;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +55,7 @@ public class ConsultationController {
 //        }
 //    }
 
-    @GetMapping("/consultation/{idConsultation}/files")
+    @GetMapping("/{idConsultation}/files")
     public ResponseEntity<List<ExistingFile>> getConsultationFiles(
             @PathVariable Long idConsultation,
             Authentication authentication) {

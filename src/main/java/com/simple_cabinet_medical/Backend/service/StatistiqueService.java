@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.Dash.*;
+import com.simple_cabinet_medical.Backend.dto.Dash.*;
 import com.simple_cabinet_medical.Backend.Mapper.Dash.DashMapper;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import com.simple_cabinet_medical.Backend.model.Patient;

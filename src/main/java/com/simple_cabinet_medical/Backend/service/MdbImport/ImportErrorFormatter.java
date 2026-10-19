@@ -1,11 +1,11 @@
 package com.simple_cabinet_medical.Backend.service.MdbImport;
 
 /**
- * Les exceptions JPA/Hibernate arrivent souvent emballées plusieurs fois
+ * JPA/Hibernate exceptions often arrive wrapped several times
  * (TransactionSystemException -> RollbackException -> ConstraintViolationException...).
- * Cette classe descend la chaîne de causes et retourne le message le plus
- * profond et le plus parlant, pour que result.errors reste lisible même
- * avec des milliers de lignes en erreur.
+ * This class walks down the cause chain and returns the deepest, most
+ * meaningful message, so that result.errors stays readable even with
+ * thousands of failing rows.
  */
 public final class ImportErrorFormatter {
 

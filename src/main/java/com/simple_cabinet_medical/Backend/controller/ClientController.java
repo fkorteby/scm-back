@@ -1,17 +1,18 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.ClientDto;
-import com.simple_cabinet_medical.Backend.Dto.ClientRegister;
-import com.simple_cabinet_medical.Backend.Dto.OtpVerificationRequest;
+import com.simple_cabinet_medical.Backend.dto.ClientDto;
+import com.simple_cabinet_medical.Backend.dto.ClientRegister;
+import com.simple_cabinet_medical.Backend.dto.OtpVerificationRequest;
+import com.simple_cabinet_medical.Backend.dto.client.ClientResponse;
 import com.simple_cabinet_medical.Backend.service.ClientService;
 import com.simple_cabinet_medical.Backend.service.OTPSerivce;
 import com.simple_cabinet_medical.Backend.utils.RecaptchaService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/clients")
@@ -69,6 +70,12 @@ public class ClientController {
         recaptchaService.validateToken(recaptchaToken, "generate_otp");
         clientService.generateOtp(email);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Page<ClientResponse>> findAllClient(Pageable pageable){
+        Page<ClientResponse> clientResponses = clientService.findAllClient(pageable);
+        return new ResponseEntity<>(clientResponses, HttpStatus.OK);
     }
 
 }

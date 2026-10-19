@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.adminDash.*;
+import com.simple_cabinet_medical.Backend.dto.adminDash.*;
 import com.simple_cabinet_medical.Backend.service.AdminDashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

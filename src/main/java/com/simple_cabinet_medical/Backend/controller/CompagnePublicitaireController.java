@@ -1,18 +1,13 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.Pub.CompagnePubRequestDto;
+import com.simple_cabinet_medical.Backend.dto.Pub.CompagnePubRequestDto;
 import com.simple_cabinet_medical.Backend.service.CompagnePublicitaireServcie;
 import com.simple_cabinet_medical.Backend.service.FileStorageService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.core.io.Resource;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/compagnePubs")

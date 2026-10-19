@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.ExamenCliniqueDto;
+import com.simple_cabinet_medical.Backend.dto.ExamenCliniqueDto;
 import com.simple_cabinet_medical.Backend.service.ExamenCliniqueService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

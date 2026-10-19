@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.ClientConfig.HeaderRequest;
+import com.simple_cabinet_medical.Backend.dto.ClientConfig.HeaderRequest;
 import com.simple_cabinet_medical.Backend.model.ClientConfig;
 import com.simple_cabinet_medical.Backend.service.ClientConfigService;
 import org.springframework.http.HttpStatus;

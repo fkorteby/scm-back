@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.ClientConfig.HeaderRequest;
+import com.simple_cabinet_medical.Backend.dto.ClientConfig.HeaderRequest;
 import com.simple_cabinet_medical.Backend.model.ClientConfig;
 import com.simple_cabinet_medical.Backend.repository.ClientConfigRepository;
 import org.springframework.stereotype.Service;

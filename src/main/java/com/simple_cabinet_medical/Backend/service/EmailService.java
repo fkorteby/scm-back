@@ -20,6 +20,8 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
+    private final String EMAIL_FROM = "contact@simple-cabinet-medical.com";
+
     public EmailService(JavaMailSender mailSender,
                         TemplateEngine templateEngine) {
         this.mailSender = mailSender;
@@ -104,6 +106,7 @@ public class EmailService {
 
             helper.setTo(to);
             helper.setSubject(subject);
+            helper.setFrom(EMAIL_FROM);
             helper.setText(htmlContent, true);
 
             ClassPathResource logo =
@@ -144,6 +147,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(targets);
+            helper.setFrom(EMAIL_FROM);
             helper.setSubject("[SUPPORT SCM] " + ticket.getSujet() + " - " + ticket.getEtablissementNom());
             helper.setText(htmlContent, true);
 

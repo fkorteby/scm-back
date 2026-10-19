@@ -1,8 +1,8 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.OtpVerificationRequest;
-import com.simple_cabinet_medical.Backend.Dto.Pub.AnnonceurRequestDto;
-import com.simple_cabinet_medical.Backend.Dto.Pub.AnnonceurResponseDto;
+import com.simple_cabinet_medical.Backend.dto.OtpVerificationRequest;
+import com.simple_cabinet_medical.Backend.dto.Pub.AnnonceurRequestDto;
+import com.simple_cabinet_medical.Backend.dto.Pub.AnnonceurResponseDto;
 import com.simple_cabinet_medical.Backend.service.AnnounceurService;
 import com.simple_cabinet_medical.Backend.service.OTPSerivce;
 import org.springframework.http.HttpStatus;

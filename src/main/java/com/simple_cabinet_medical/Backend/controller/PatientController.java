@@ -1,9 +1,9 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.PatientResponseDto;
-import com.simple_cabinet_medical.Backend.Dto.PatientsRapportDTO;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryPatientsDTO;
-import com.simple_cabinet_medical.Backend.Dto.StateOfPatient;
+import com.simple_cabinet_medical.Backend.dto.PatientResponseDto;
+import com.simple_cabinet_medical.Backend.dto.PatientsRapportDTO;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryPatientsDTO;
+import com.simple_cabinet_medical.Backend.dto.StateOfPatient;
 import com.simple_cabinet_medical.Backend.service.PatientService;
 import org.springframework.http.HttpStatus;
 import org.slf4j.Logger;
@@ -144,6 +144,7 @@ public class PatientController {
 
         return ResponseEntity.ok(stats);
     }
+
     @GetMapping("extraInfos/{idPatient}")
     public ResponseEntity<StateOfPatient> getExtraInfos(@PathVariable Long idPatient){
         StateOfPatient stateOfPatient = patientService.getInfos(idPatient);

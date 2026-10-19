@@ -8,11 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Supprime le fichier .mdb temporaire une fois le Job VRAIMENT terminé
- * (succès ou échec). Indispensable maintenant que le Job tourne en
- * asynchrone : on ne peut plus supprimer le fichier juste après avoir
- * lancé le Job dans le contrôleur (comme avant), puisque le Job est
- * encore en train de le lire à ce moment-là.
+ * Deletes the temporary .mdb file once the Job has REALLY finished (success
+ * or failure). Necessary now that the Job runs asynchronously: the file can
+ * no longer be deleted right after launching the Job in the controller (as
+ * before), since the Job is still reading it at that point in time.
  */
 public class TempFileCleanupListener implements JobExecutionListener {
 
@@ -24,7 +23,7 @@ public class TempFileCleanupListener implements JobExecutionListener {
         try {
             Files.deleteIfExists(Path.of(filePath));
         } catch (IOException ignored) {
-            // Non bloquant : au pire un fichier temporaire orphelin dans /tmp.
+            // Non-blocking: worst case, an orphaned temp file in /tmp.
         }
     }
 }

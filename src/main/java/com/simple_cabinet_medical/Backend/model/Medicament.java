@@ -9,7 +9,12 @@ import jakarta.persistence.*;
 public class Medicament extends BasedObject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "medicament_seq")
+    @SequenceGenerator(
+            name = "medicament_seq",
+            sequenceName = "medicament_id_seq",
+            allocationSize = 1
+    )
     private Long idMedicament;
 
     @Column(nullable = false)

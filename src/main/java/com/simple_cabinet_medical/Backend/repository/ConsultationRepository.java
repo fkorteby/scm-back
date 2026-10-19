@@ -1,9 +1,8 @@
 package com.simple_cabinet_medical.Backend.repository;
 
-import com.simple_cabinet_medical.Backend.Dto.Dash.ConsultationsParMoisDTO;
-import com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryPatientsDTO;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryProjection;
+import com.simple_cabinet_medical.Backend.dto.Dash.ConsultationsParMoisDTO;
+import com.simple_cabinet_medical.Backend.dto.DiagnosticDTO;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryProjection;
 import com.simple_cabinet_medical.Backend.Projection.ConsultationsProjection;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import org.springframework.data.domain.Page;
@@ -43,7 +42,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     List<Consultation> findAllByClientCreatorIdAndDateConsultationOrderByDateConsultationDesc(Long clientCreatorId, LocalDate dateConsultation);
 
     @Query("""
-            SELECT new com.simple_cabinet_medical.Backend.Dto.Dash.ConsultationsParMoisDTO(
+            SELECT new com.simple_cabinet_medical.Backend.dto.Dash.ConsultationsParMoisDTO(
                 YEAR(c.dateConsultation),
                 MONTH(c.dateConsultation),
                 COUNT(c.idConsultation)
@@ -94,7 +93,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
 
     @RestResource(exported = false)
     @Query("""
-    SELECT DISTINCT new com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO(c.diagnosticMedical)
+    SELECT DISTINCT new com.simple_cabinet_medical.Backend.dto.DiagnosticDTO(c.diagnosticMedical)
     FROM Consultation c
     WHERE c.clientCreatorId = :idClient
       AND TRANSLATE(
@@ -116,13 +115,16 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             Pageable pageable);
 
     @Query(value = """
-            SELECT diagnostic_medical, COUNT(id_consultation)
-            FROM consultation as c
-                    where c.client_creator_id = :idClient
-            GROUP BY diagnostic_medical
-            LIMIT 10
-            """, nativeQuery = true)
-    List<Object> getTop10DiagnosticMedical(Long idClient);
+        SELECT diagnostic_medical, COUNT(id_consultation)
+        FROM consultation as c
+        WHERE c.client_creator_id = :idClient
+          AND c.diagnostic_medical IS NOT NULL
+          AND TRIM(c.diagnostic_medical) != ''
+        GROUP BY diagnostic_medical
+        ORDER BY COUNT(id_consultation) DESC
+        LIMIT 10
+        """, nativeQuery = true)
+    List<Object> getTop10DiagnosticMedical(@Param("idClient") Long idClient);
 
     @Query(value = """
             SELECT
@@ -379,4 +381,15 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     long countByDateConsultationAndClient_IdClientNot(LocalDate dateConsultation, Long id);
 
     void deleteConsultationByIdConsultation(Long consultationId);
+
+    @Query("""
+    SELECT COUNT(DISTINCT c.client.idClient)
+    FROM Consultation c
+    WHERE c.dateConsultation >= :startDate
+      AND c.client.idClient <> :excludedId
+""")
+    long countActiveDoctorsSince(
+            @Param("startDate") LocalDate startDate,
+            @Param("excludedId") Long excludedId
+    );
 }

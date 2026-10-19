@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.adminDash.*;
+import com.simple_cabinet_medical.Backend.dto.adminDash.*;
 import com.simple_cabinet_medical.Backend.repository.ClientRepository;
 import com.simple_cabinet_medical.Backend.repository.ConsultationRepository;
 import com.simple_cabinet_medical.Backend.repository.PatientRepository;
@@ -39,7 +39,8 @@ public class AdminDashboardService {
         long newDoctorsThisWeek = clientRepository.countByDateCreationAfterAndIdClientNot(dateWeekAgo, ADMIN_CLIENT_ID);
 
         // Comptes actifs : ont créé au moins une consultation ces 7 derniers jours
-        long activeDoctors = clientRepository.countActiveDoctorsSince(localDateWeekAgo, ADMIN_CLIENT_ID);
+        long activeDoctors = consultationRepository.countActiveDoctorsSince(localDateWeekAgo, ADMIN_CLIENT_ID);
+//        long activeDoctors = 4;
 
         // Comptes inactifs : total - actifs
         long inactiveDoctors = totalDoctors - activeDoctors;

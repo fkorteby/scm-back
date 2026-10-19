@@ -1,7 +1,7 @@
 package com.simple_cabinet_medical.Backend.Mapper.Dash;
 
-import com.simple_cabinet_medical.Backend.Dto.Dash.PatientAujhDto;
-import com.simple_cabinet_medical.Backend.Dto.Dash.RenderVousAujhDto;
+import com.simple_cabinet_medical.Backend.dto.Dash.PatientAujhDto;
+import com.simple_cabinet_medical.Backend.dto.Dash.RenderVousAujhDto;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import com.simple_cabinet_medical.Backend.model.RendezVous;
 import org.springframework.stereotype.Component;

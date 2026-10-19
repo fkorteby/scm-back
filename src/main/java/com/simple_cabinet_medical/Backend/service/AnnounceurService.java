@@ -1,7 +1,7 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.Pub.AnnonceurRequestDto;
-import com.simple_cabinet_medical.Backend.Dto.Pub.AnnonceurResponseDto;
+import com.simple_cabinet_medical.Backend.dto.Pub.AnnonceurRequestDto;
+import com.simple_cabinet_medical.Backend.dto.Pub.AnnonceurResponseDto;
 import com.simple_cabinet_medical.Backend.Mapper.Pub.AnnounceurMapper;
 import com.simple_cabinet_medical.Backend.model.*;
 import com.simple_cabinet_medical.Backend.repository.AnnonceurRepository;

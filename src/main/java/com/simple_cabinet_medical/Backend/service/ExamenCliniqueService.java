@@ -1,14 +1,12 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.ExamenCliniqueDto;
+import com.simple_cabinet_medical.Backend.dto.ExamenCliniqueDto;
 import com.simple_cabinet_medical.Backend.model.ExamenClinique;
 import com.simple_cabinet_medical.Backend.repository.ExamenCliniqueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.antlr.v4.runtime.tree.Trees.getChildren;
 
 @Service
 public class ExamenCliniqueService {

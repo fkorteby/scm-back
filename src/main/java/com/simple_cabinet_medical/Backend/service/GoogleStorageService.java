@@ -2,12 +2,15 @@ package com.simple_cabinet_medical.Backend.service;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
-import com.simple_cabinet_medical.Backend.Dto.ExistingFile;
+import com.simple_cabinet_medical.Backend.dto.ExistingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -21,8 +24,15 @@ public class GoogleStorageService {
     private static final Logger log = LoggerFactory.getLogger(GoogleStorageService.class);
     private final Storage storage;
 
-    private final String bucketName = "scm-logos-prod";
-    private final String bucketName1 = "scm-medical-files-prod";
+    @Value("${gcp.storage.bucket-logos}")
+    private String bucketName;
+
+    @Value("${gcp.storage.bucket-medical-files}")
+    private String bucketName1;
+
+    @Value("${gcp.storage.bucket-mdb-files}")
+    private String bucketName2;
+
 
 
     public GoogleStorageService(Storage storage) {
@@ -223,6 +233,45 @@ public class GoogleStorageService {
         }
     }
 
+    public String generateUploadUrlForMdp(String path, String contentType) {
+
+        if (path == null || path.trim().isEmpty()) {
+            log.warn("Generate upload URL failed: invalid path");
+            throw new IllegalArgumentException("Path cannot be null or empty");
+        }
+
+        try {
+
+            log.info("Generating signed upload URL for path: {}", path);
+
+            BlobInfo blobInfo = BlobInfo
+                    .newBuilder(
+                            BlobId.of(bucketName2, path)
+                    )
+                    .setContentType(contentType)
+                    .build();
+
+
+            URL url = storage.signUrl(
+                    blobInfo,
+                    15,
+                    TimeUnit.MINUTES,
+                    Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
+                    Storage.SignUrlOption.withV4Signature()
+            );
+
+
+            log.info("Signed URL generated successfully for: {}", path);
+
+            return url.toString();
+
+
+        } catch (Exception e) {
+
+            log.error("Error generating signed URL for path: {}", path, e);
+            throw new RuntimeException("Unable to generate upload URL", e);
+        }
+    }
 
     public List<ExistingFile> listFilesForConsultation(Long consultationId, Long clientId) {
         String folderPath = clientId + "/consultations/" + consultationId + "/";
@@ -250,7 +299,7 @@ public class GoogleStorageService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteAllFilesByClient(Long clientId){
+    public void deleteAllFilesByClient(Long clientId) {
         this.deleteLogoByClient(clientId);
         this.deleteConsultationFilesByClient(clientId);
     }
@@ -395,4 +444,46 @@ public class GoogleStorageService {
             throw e;
         }
     }
+
+    public File downloadToTempFile(String path, String tempFilePrefix, String tempFileSuffix) {
+
+        BlobId blobId = BlobId.of(bucketName2, path);
+        Blob blob = storage.get(blobId);
+
+        if (blob == null || !blob.exists()) {
+            throw new IllegalArgumentException("Fichier introuvable dans le bucket: " + path);
+        }
+
+        try {
+            File tempFile = File.createTempFile(tempFilePrefix, tempFileSuffix);
+
+            long start = System.currentTimeMillis();
+
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                blob.downloadTo(tempFile.toPath());
+            }
+
+            log.info(
+                    "Downloaded gs://{}/{} to {} ({} bytes) in {} ms",
+                    bucketName2, path, tempFile.getAbsolutePath(),
+                    tempFile.length(), System.currentTimeMillis() - start
+            );
+
+            return tempFile;
+
+        } catch (IOException e) {
+            log.error("Error downloading blob {} from bucket {}", path, bucketName2, e);
+            throw new RuntimeException("Unable to download file from GCS: " + path, e);
+        }
+    }
+
+    public void deleteBlob(String path) {
+        try {
+            boolean deleted = storage.delete(BlobId.of(bucketName2, path));
+            log.info("Blob {} deleted: {}", path, deleted);
+        } catch (Exception e) {
+            log.warn("Could not delete blob {}: {}", path, e.getMessage());
+        }
+    }
+
 }

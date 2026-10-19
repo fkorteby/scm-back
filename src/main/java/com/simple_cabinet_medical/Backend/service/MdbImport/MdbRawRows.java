@@ -3,8 +3,8 @@ package com.simple_cabinet_medical.Backend.service.MdbImport;
 import java.sql.Date;
 
 /**
- * DTOs "bruts" (une ligne = un objet), utilisés uniquement pendant la lecture
- * en flux du fichier MDB, avant transformation en entités JPA.
+ * "Raw" DTOs (one row = one object), used only while streaming through the
+ * MDB file, before conversion into JPA entities.
  */
 public final class MdbRawRows {
 
@@ -16,13 +16,13 @@ public final class MdbRawRows {
                              String autres) {
     }
 
-    /** Commun aux 2 versions. conduite/trait2 sont null pour la v1.0. */
+    /** Common to both versions. conduite/trait2 are null for v1.0. */
     public record RawConsultation(long numCons, long numMal, Date dateCons, String motif, String diag,
                                   String rsltExamen, String rsltPara, String conduite_cons,
                                   String traitCons, String trait2Cons) {
     }
 
-    /** Table presc — n'existe que pour la v1.7. */
+    /** presc table — only exists for v1.7. */
     public record RawPresc(long numCons, long numMal, String medic, String forme, String poso, String duree) {
     }
 }

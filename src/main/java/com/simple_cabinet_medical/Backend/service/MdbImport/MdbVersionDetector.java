@@ -23,19 +23,19 @@ public class MdbVersionDetector {
         try (Connection conn = DriverManager.getConnection(urlBuilder.toString())) {
             DatabaseMetaData md = conn.getMetaData();
 
-            // On cherche la table "presc"
-            // Le type "TABLE" permet d'ignorer les vues ou les tables système si nécessaire
+            // Look for the "presc" table.
+            // The "TABLE" type filter ignores views or system tables.
             try (ResultSet rs = md.getTables(null, null, "presc", new String[]{"TABLE"})) {
                 if (rs.next()) {
-                    // Si la table "presc" existe -> C'est la Version 1.7
+                    // "presc" table exists -> Version 1.7
                     return MdbVersion.V1_7;
                 } else {
-                    // Si la table "presc" n'existe pas -> C'est la Version 1.0
+                    // "presc" table does not exist -> Version 1.0
                     return MdbVersion.V1_0;
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erreur d'accès au fichier MDB (Vérifiez le mot de passe) : " + e.getMessage());
+            throw new RuntimeException("Error accessing the MDB file (check the password): " + e.getMessage());
         }
     }
 }

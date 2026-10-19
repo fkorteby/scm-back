@@ -19,26 +19,18 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * Reader pour les fichiers MDB v1.7.
+ * Reader for "v1.7" MDB files.
  *
- * CORRECTION 1 (colonnes optionnelles) : certains fichiers .mdb de cette
- * "version 1.7" n'ont en réalité PAS toutes les colonnes attendues (ex:
- * trait2_cons absente sur certains fichiers clients). Avant, seules
- * conduite_cons et autres_mal étaient protégées par hasColumn(...) ; le reste
- * plantait le Job entier avec une HsqlException "Column not found" dès la
- * première ligne. Maintenant TOUTES les colonnes optionnelles sont谁 vérifiées
- * une seule fois à l'ouverture (pas à chaque ligne, pour la performance), et
- * une colonne absente => on continue simplement sans cette donnée, jamais de
- * crash du Job pour ça.
- * crash du Job pour ça.
+ * <p>NOTE 1 (optional columns): some MDB files of this "version 1.7" do not
+ * actually have every expected column (e.g. trait2_cons missing on some
+ * client files). All optional columns are checked ONCE at open() time (not
+ * per row, for performance) — a missing column simply means the field is
+ * skipped, never a crash of the whole Job.
  *
- * CORRECTION 2 (priorité des traitements) : avant, on regardait D'ABORD la
- * table presc, et seulement si elle ne contenait rien pour cette consultation
- * on repliait sur trait_cons/trait2_cons. Maintenant c'est l'inverse, comme
- * demandé : on essaie D'ABORD de parser trait_cons/trait2_cons ; si ça donne
- * au moins un traitement, on s'arrête là (pas besoin d'aller chercher dans
- * presc) ; seulement si trait_cons est vide/ne donne rien, on va chercher
- * dans presc.
+ * <p>NOTE 2 (treatment source priority): trait_cons/trait2_cons is parsed
+ * FIRST for a given consultation; if it yields at least one treatment, the
+ * presc table is not consulted for that consultation. Only if trait_cons is
+ * empty/unparsable do we fall back to presc.
  */
 public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit> {
 
@@ -63,14 +55,14 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
     private Client client;
     private Map<String, Medicament> medicamentCache;
 
-    // Colonnes détectées une seule fois à l'ouverture (voir open())
+    // Columns detected once at open() time (see open())
     private boolean hasAutresMal;
     private boolean hasConduiteCons;
     private boolean hasTrait2Cons;
 
-    private static final Pattern EXTRACT_CROCHET =
+    private static final Pattern EXTRACT_BRACKET =
             Pattern.compile("^(.+?)\\s*\\[([^\\]]+)\\]\\s*$");
-    private static final Pattern EXTRACT_PARENTHESE =
+    private static final Pattern EXTRACT_PARENTHESIS =
             Pattern.compile("^(.+?)\\s*\\(([^)]*(?:\\([^)]*\\)[^)]*)?)\\)\\s*$");
 
     public MdbPatientItemReader(String filePath, String password, Long clientId,
@@ -85,7 +77,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         this.rowPersister = rowPersister;
     }
 
-    // ─── Cycle de vie Spring Batch ──────────────────────────────────────────
+    // ─── Spring Batch lifecycle ─────────────────────────────────────────────
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
@@ -93,7 +85,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
             conn = DriverManager.getConnection(buildJdbcUrl());
 
             client = clientRepository.findById(clientId)
-                    .orElseThrow(() -> new IllegalStateException("Client non trouvé : id=" + clientId));
+                    .orElseThrow(() -> new IllegalStateException("Client not found: id=" + clientId));
 
             medicamentCache = new HashMap<>();
             for (Medicament m : medicamentRepository.findMedicamentsByClientCreatorId(1L)) {
@@ -106,17 +98,17 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
 
             boolean hasPrescTable = tableExists("presc");
 
-            // ── Préchargement (2 scans complets, une seule fois) ─────────────
+            // ── Preload (two full scans, done once) ──────────────────────
             consultationsByPatient = preloadConsultations();
             prescByConsultation = hasPrescTable ? preloadPresc() : Collections.emptyMap();
 
-            // ── Curseur patient (streaming, celui-ci reste en flux) ─────────
+            // ── Patient cursor (streaming, stays a live cursor) ──────────
             stmtPatients = conn.createStatement();
             ResultSet rsPatients = stmtPatients.executeQuery("SELECT * FROM mal");
             patientCursor = new RowCursor<>(rsPatients, this::mapPatient);
 
         } catch (SQLException e) {
-            throw new ItemStreamException("Impossible d'ouvrir le fichier MDB v1.7 : " + e.getMessage(), e);
+            throw new ItemStreamException("Unable to open v1.7 MDB file: " + e.getMessage(), e);
         }
     }
 
@@ -159,7 +151,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
     @Override
     public PatientImportUnit read() throws Exception {
         if (patientCursor.isExhausted()) {
-            return null; // fin du flux -> Spring Batch arrête le step proprement
+            return null; // end of stream -> Spring Batch stops the step cleanly
         }
 
         RawPatient rp = patientCursor.consume();
@@ -170,84 +162,85 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
 
         for (RawConsultation rc : rawConsultations) {
             Consultation c = buildConsultation(rc);
-            List<Traitement> traitements = resolveTraitements(rc, c);
-            units.add(new ConsultationUnit(c, traitements));
+            List<Traitement> treatments = resolveTreatments(rc, c);
+            units.add(new ConsultationUnit(c, treatments));
         }
 
         return new PatientImportUnit(rp.numMal(), patient, units);
     }
 
     /**
-     * Logique à 3 niveaux, appliquée INDÉPENDAMMENT pour chaque consultation
-     * (donc une base qui mélange des consultations "ancien style" trait_cons
-     * et des consultations "nouveau style" presc est gérée correctement,
-     * ligne par ligne — ce n'est jamais un choix global pour tout le fichier) :
+     * Three-level logic, applied INDEPENDENTLY for each consultation (so a
+     * database mixing "old style" trait_cons and "new style" presc
+     * consultations is handled correctly, row by row — never a global choice
+     * for the whole file):
      *
-     *  1. On essaie de PARSER trait_cons/trait2_cons (format structuré
-     *     "NOM[DOSAGE] forme (durée" + posologie en ligne suivante).
-     *     Si ça donne au moins un traitement -> terminé pour cette consultation.
-     *
-     *  2. Sinon, on regarde la table presc pour cette consultation (num_cons).
-     *     Si elle contient des lignes -> terminé.
-     *
-     *  3. Sinon, si trait_cons contenait quand même du texte (mais du texte
-     *     LIBRE, tapé à la main, qui ne respecte pas le format structuré —
-     *     ex: "ANTAG 20 +SORBITOL AMP+LIBRAX 1 COM /J+ METEOXANE") -> on ne
-     *     tente PAS de le parser comme un médicament structuré (on se
-     *     tromperait), on le stocke TEL QUEL sur le champ texte libre de la
-     *     consultation, pour ne rien perdre. Aucun Traitement structuré n'est
-     *     créé dans ce cas (pas de Medicament à rattacher de façon fiable).
+     * <ol>
+     *   <li>Try to PARSE trait_cons/trait2_cons (structured format
+     *       "NAME[DOSAGE] form (duration" + dosage instructions on the next
+     *       line). If it yields at least one treatment -> done for this
+     *       consultation.</li>
+     *   <li>Otherwise, look at the presc table for this consultation
+     *       (num_cons). If it has rows -> done.</li>
+     *   <li>Otherwise, if trait_cons still contained text (but FREE text,
+     *       hand-typed, not matching the structured format — e.g.
+     *       "ANTAG 20 +SORBITOL AMP+LIBRAX 1 COM /J+ METEOXANE") -> it is NOT
+     *       parsed as a structured drug (too risky), it is stored AS-IS on
+     *       the consultation's free-text field so nothing is lost. No
+     *       structured Traitement is created in this case (no drug can be
+     *       reliably attached).</li>
+     * </ol>
      */
-    private List<Traitement> resolveTraitements(RawConsultation rc, Consultation c) {
-        List<Traitement> traitements = new ArrayList<>();
+    private List<Traitement> resolveTreatments(RawConsultation rc, Consultation c) {
+        List<Traitement> treatments = new ArrayList<>();
 
         String raw = (rc.traitCons() != null ? rc.traitCons() : "")
                 + (rc.trait2Cons() != null ? " " + rc.trait2Cons() : "");
 
         for (TraitementParser.ParsedTraitement pt : TraitementParser.parse(raw)) {
             Medicament med = getOrCreateMedicament(pt);
-            traitements.add(buildTraitement(med, pt.duree, pt.posologie));
+            treatments.add(buildTraitement(med, pt.duree, pt.posologie));
         }
 
-        if (!traitements.isEmpty()) {
-            return traitements; // trouvé dans trait_cons -> pas besoin de presc
+        if (!treatments.isEmpty()) {
+            return treatments; // found in trait_cons -> no need for presc
         }
 
         List<RawPresc> prescRows = prescByConsultation.get(rc.numCons());
         if (prescRows != null) {
             for (RawPresc rpx : prescRows) {
-                String medicBrut = clean(rpx.medic());
-                if (medicBrut == null || medicBrut.isBlank()) continue;
+                String rawDrug = clean(rpx.medic());
+                if (rawDrug == null || rawDrug.isBlank()) continue;
 
                 Medicament med = getOrCreateMedicamentDirect(
-                        extractNom(medicBrut), extractDosage(medicBrut), rpx.forme(), rpx.poso());
-                traitements.add(buildTraitement(med, rpx.duree(), rpx.poso()));
+                        extractName(rawDrug), extractDosage(rawDrug), rpx.forme(), rpx.poso());
+                treatments.add(buildTraitement(med, rpx.duree(), rpx.poso()));
             }
         }
 
-        if (!traitements.isEmpty()) {
-            return traitements; // trouvé dans presc -> terminé
+        if (!treatments.isEmpty()) {
+            return treatments; // found in presc -> done
         }
 
-        // Ni trait_cons structuré, ni presc : si trait_cons contenait quand
-        // même du texte libre, on le conserve tel quel sur la consultation.
+        // Neither structured trait_cons nor presc: if trait_cons still had
+        // free text, keep it as-is on the consultation.
         if (!raw.isBlank()) {
             c.setTraitement(raw.trim());
 
             if (unparsedLogCount < MAX_UNPARSED_LOGS) {
                 unparsedLogCount++;
                 String sample = raw.length() > 150 ? raw.substring(0, 150) + "…" : raw;
-                log.info("[import-mdb] num_cons={} : trait_cons en texte libre (non structuré), conservé tel quel. Aperçu : {}",
+                log.info("[import-mdb] num_cons={}: unstructured free-text trait_cons, kept as-is. Preview: {}",
                         rc.numCons(), sample.replace("\n", " \\n "));
             }
         }
 
-        return traitements;
+        return treatments;
     }
 
     @Override
     public void update(ExecutionContext executionContext) {
-        // Pas d'état de restart persistable pour ce reader.
+        // No restartable state for this reader.
     }
 
     @Override
@@ -259,7 +252,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         }
     }
 
-    // ─── Mapping ResultSet -> DTO brut ──────────────────────────────────────
+    // ─── ResultSet -> raw DTO mapping ────────────────────────────────────────
 
     private RawPatient mapPatient(ResultSet rs) throws SQLException {
         return new RawPatient(
@@ -271,7 +264,7 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         );
     }
 
-    // ─── Construction des entités JPA (pas encore persistées) ──────────────
+    // ─── Building JPA entities (not persisted yet) ──────────────────────────
 
     private Patient buildPatient(RawPatient rp) {
         Patient p = new Patient();
@@ -310,12 +303,12 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         Traitement t = new Traitement();
         t.setMedicament(m);
         t.setDuree(duree);
-        t.setPosologie(poso != null && !poso.isBlank() ? poso : "Non précisée");
+        t.setPosologie(poso != null && !poso.isBlank() ? poso : "Not specified");
         t.setClientCreatorId(clientId);
         return t;
     }
 
-    // ─── Médicaments ─────────────────────────────────────────────────────
+    // ─── Drugs ───────────────────────────────────────────────────────────
 
     private Medicament getOrCreateMedicamentDirect(String nom, String dosage, String forme, String poso) {
         String key = cacheKey(nom, dosage);
@@ -356,27 +349,27 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         return (nom == null ? "" : nom.toUpperCase()) + "_" + (dosage == null ? "" : dosage.toUpperCase());
     }
 
-    // ─── Extraction nom / dosage ────────────────────────────────────────────
+    // ─── Name / dosage extraction ────────────────────────────────────────────
 
-    private String extractNom(String medic) {
-        if (medic == null) return null;
-        Matcher m = EXTRACT_CROCHET.matcher(medic.trim());
+    private String extractName(String drug) {
+        if (drug == null) return null;
+        Matcher m = EXTRACT_BRACKET.matcher(drug.trim());
         if (m.matches()) return m.group(1).trim();
-        m = EXTRACT_PARENTHESE.matcher(medic.trim());
+        m = EXTRACT_PARENTHESIS.matcher(drug.trim());
         if (m.matches()) return m.group(1).trim();
-        return medic.trim();
+        return drug.trim();
     }
 
-    private String extractDosage(String medic) {
-        if (medic == null) return null;
-        Matcher m = EXTRACT_CROCHET.matcher(medic.trim());
+    private String extractDosage(String drug) {
+        if (drug == null) return null;
+        Matcher m = EXTRACT_BRACKET.matcher(drug.trim());
         if (m.matches()) return m.group(2).trim();
-        m = EXTRACT_PARENTHESE.matcher(medic.trim());
+        m = EXTRACT_PARENTHESIS.matcher(drug.trim());
         if (m.matches()) return m.group(2).trim();
         return null;
     }
 
-    // ─── Utilitaires ────────────────────────────────────────────────────────
+    // ─── Utilities ──────────────────────────────────────────────────────────
 
     private boolean tableExists(String tableName) throws SQLException {
         try (ResultSet rs = conn.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
@@ -385,9 +378,9 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
     }
 
     /**
-     * Vérifie si une colonne existe dans une table, via les métadonnées JDBC
-     * (pas besoin d'ouvrir un ResultSet sur les données). Utilisé UNE SEULE
-     * FOIS à l'ouverture pour chaque colonne optionnelle — pas de coût par ligne.
+     * Checks whether a column exists in a table, via JDBC metadata (no need
+     * to open a ResultSet on the actual data). Called ONCE at open() time
+     * per optional column — no per-row cost.
      */
     private boolean tableHasColumn(String tableName, String columnName) throws SQLException {
         try (ResultSet rs = conn.getMetaData().getColumns(null, null, tableName, columnName)) {
