@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service.notification;
 
-import com.simple_cabinet_medical.Backend.Dto.notifications.UserNotificationResponseDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.UserNotificationResponseDto;
 import com.simple_cabinet_medical.Backend.model.notifications.ENotificationStatus;
 import com.simple_cabinet_medical.Backend.model.notifications.Notification;
 import com.simple_cabinet_medical.Backend.model.notifications.NotificationTarget;

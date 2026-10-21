@@ -1,8 +1,7 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.ClientDto;
-import com.simple_cabinet_medical.Backend.Dto.OtpVerificationRequest;
-import com.simple_cabinet_medical.Backend.Dto.Pub.AnnonceurResponseDto;
+import com.simple_cabinet_medical.Backend.dto.OtpVerificationRequest;
+import com.simple_cabinet_medical.Backend.dto.Pub.AnnonceurResponseDto;
 import com.simple_cabinet_medical.Backend.Mapper.Client.ClientMapper;
 import com.simple_cabinet_medical.Backend.Mapper.Pub.AnnounceurMapper;
 import com.simple_cabinet_medical.Backend.model.*;

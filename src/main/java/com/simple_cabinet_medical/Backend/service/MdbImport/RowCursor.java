@@ -3,15 +3,6 @@ package com.simple_cabinet_medical.Backend.service.MdbImport;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Curseur "avec un coup d'avance" (peek) au-dessus d'un ResultSet JDBC (forward-only).
- * Nécessaire pour faire un merge-join manuel entre plusieurs curseurs triés
- * (mal / cons / presc) sans jamais charger une table entière en mémoire :
- * on ne garde que la ligne courante de chaque flux.
- *
- * Usage : tant que peek() correspond à la clé qu'on traite, on consume() et
- * on avance ; dès que la clé change, on passe au groupe suivant.
- */
 public class RowCursor<T> {
 
     @FunctionalInterface
@@ -39,13 +30,11 @@ public class RowCursor<T> {
         }
     }
 
-    /** Ligne courante, sans avancer. Null si le flux est épuisé. */
-    public T peek() {
+     public T peek() {
         return buffered;
     }
 
-    /** Retourne la ligne courante et avance au suivant. */
-    public T consume() throws SQLException {
+     public T consume() throws SQLException {
         T value = buffered;
         advance();
         return value;

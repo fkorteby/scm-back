@@ -11,7 +11,12 @@ import java.util.List;
 public class Patient extends BasedObject implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_seq")
+    @SequenceGenerator(
+            name = "patient_seq",
+            sequenceName = "patient_id_seq",
+            allocationSize = 1
+    )
     private Long idPatient;
 
     private String nom;
@@ -26,8 +31,9 @@ public class Patient extends BasedObject implements Serializable {
 
     private String sexe;
 
+    @Column(columnDefinition = "TEXT")
     private String adresse;
-
+   
     private String profession;
 
     private Boolean assurance;
@@ -39,19 +45,19 @@ public class Patient extends BasedObject implements Serializable {
     private String passport;
 
     private String acteNaissance;
-    
-    @Lob
+
+    @Column(columnDefinition = "text")
     private String antecedentsPersonnelsMedicaux;
 
-    @Lob
+    @Column(columnDefinition = "text")
     private String antecedentsPersonnelsChirugicaux;
 
-    @Lob
+    @Column(columnDefinition = "text")
     private String antecedentsFamiliaux;
 
-    @Lob
+    @Column(columnDefinition = "text")
     private String autres;
-
+    
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;

@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.repository;
 
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryProjection;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryProjection;
 import com.simple_cabinet_medical.Backend.Projection.PatientsProjection;
 import com.simple_cabinet_medical.Backend.model.Patient;
 import org.springframework.data.domain.Page;
@@ -114,42 +114,31 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             """)
     Long nombrePatientByClient(Long clientCreatorId);
 
-    ///  //////////// RAPPORTS /////////////////
     @Query(value = """
-    SELECT p.*, sub.derniere_consultation
-    FROM patient p
-    INNER JOIN (
-        SELECT patient_id, MAX(date_consultation) as derniere_consultation
-        FROM consultation
-        GROUP BY patient_id
-    ) sub ON p.id_patient = sub.patient_id
-    WHERE p.client_creator_id = :clientId
-      AND (:dateDebut IS NULL OR sub.derniere_consultation >= CAST(:dateDebut AS date))
-      AND (:dateFin IS NULL OR sub.derniere_consultation <= CAST(:dateFin AS date))
-      AND (:sexe IS NULL OR p.sexe = :sexe)
-      AND (:situation IS NULL OR p.situation = :situation)
-      AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-      AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
-      AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
-    ORDER BY p.nom, p.prenom ASC
-    """,
+SELECT p.*
+FROM patient p
+WHERE p.client_creator_id = :clientId
+  AND (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+  AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+  AND (:sexe IS NULL OR p.sexe = :sexe)
+  AND (:situation IS NULL OR p.situation = :situation)
+  AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
+  AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
+  AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
+ORDER BY p.nom, p.prenom ASC
+""",
             countQuery = """
-    SELECT COUNT(p.id_patient)
-    FROM patient p
-    INNER JOIN (
-        SELECT patient_id, MAX(date_consultation) as derniere_consultation
-        FROM consultation
-        GROUP BY patient_id
-    ) sub ON p.id_patient = sub.patient_id
-    WHERE p.client_creator_id = :clientId
-      AND (:dateDebut IS NULL OR sub.derniere_consultation >= CAST(:dateDebut AS date))
-      AND (:dateFin IS NULL OR sub.derniere_consultation <= CAST(:dateFin AS date))
-      AND (:sexe IS NULL OR p.sexe = :sexe)
-      AND (:situation IS NULL OR p.situation = :situation)
-      AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-      AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
-      AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
-    """,
+SELECT COUNT(p.id_patient)
+FROM patient p
+WHERE p.client_creator_id = :clientId
+  AND (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+  AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+  AND (:sexe IS NULL OR p.sexe = :sexe)
+  AND (:situation IS NULL OR p.situation = :situation)
+  AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
+  AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
+  AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
+""",
             nativeQuery = true)
     Page<Patient> findRapportByClient(
             @Param("clientId") Long clientId,
@@ -162,39 +151,30 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             @Param("ageMax") Integer ageMax,
             Pageable pageable);
 
+
     @Query(value = """
-    SELECT p.*, sub.derniere_consultation
-    FROM patient p
-    INNER JOIN (
-        SELECT patient_id, MAX(date_consultation) as derniere_consultation
-        FROM consultation
-        GROUP BY patient_id
-    ) sub ON p.id_patient = sub.patient_id
-    WHERE (:dateDebut IS NULL OR sub.derniere_consultation >= CAST(:dateDebut AS date))
-      AND (:dateFin IS NULL OR sub.derniere_consultation <= CAST(:dateFin AS date))
-      AND (:sexe IS NULL OR p.sexe = :sexe)
-      AND (:situation IS NULL OR p.situation = :situation)
-      AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-      AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
-      AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
-    ORDER BY p.nom, p.prenom ASC
-    """,
+SELECT p.*
+FROM patient p
+WHERE (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+  AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+  AND (:sexe IS NULL OR p.sexe = :sexe)
+  AND (:situation IS NULL OR p.situation = :situation)
+  AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
+  AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
+  AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
+ORDER BY p.nom, p.prenom ASC
+""",
             countQuery = """
-    SELECT COUNT(p.id_patient)
-    FROM patient p
-    INNER JOIN (
-        SELECT patient_id, MAX(date_consultation) as derniere_consultation
-        FROM consultation
-        GROUP BY patient_id
-    ) sub ON p.id_patient = sub.patient_id
-    WHERE (:dateDebut IS NULL OR sub.derniere_consultation >= CAST(:dateDebut AS date))
-      AND (:dateFin IS NULL OR sub.derniere_consultation <= CAST(:dateFin AS date))
-      AND (:sexe IS NULL OR p.sexe = :sexe)
-      AND (:situation IS NULL OR p.situation = :situation)
-      AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-      AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
-      AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
-    """,
+SELECT COUNT(p.id_patient)
+FROM patient p
+WHERE (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+  AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+  AND (:sexe IS NULL OR p.sexe = :sexe)
+  AND (:situation IS NULL OR p.situation = :situation)
+  AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
+  AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
+  AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
+""",
             nativeQuery = true)
     Page<Patient> findRapportAll(
             @Param("dateDebut") String dateDebut,
@@ -205,63 +185,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             @Param("ageMin") Integer ageMin,
             @Param("ageMax") Integer ageMax,
             Pageable pageable);
-    /**
-     * Comptage par sexe pour le récapitulatif (filtré client).
-     */
-    @Query(value = """
-            SELECT p.sexe, COUNT(p.id_patient)
-            FROM patient p
-            WHERE p.client_creator_id= :clientId
-              AND (:dateDebut IS NULL OR DATE(p.date_creation) >= CAST(:dateDebut AS date))
-              AND (:dateFin   IS NULL OR DATE(p.date_creation) <= CAST(:dateFin   AS date))
-              AND (:sexe      IS NULL OR p.sexe      = :sexe)
-              AND (:situation IS NULL OR p.situation = :situation)
-              AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-              AND (:ageMin    IS NULL OR
-                   (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-              AND (:ageMax    IS NULL OR
-                   (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-            GROUP BY p.sexe
-            """, nativeQuery = true)
-    List<Object[]> countRapportBySexe(
-            @Param("clientId") Long clientId,
-            @Param("dateDebut") String dateDebut,
-            @Param("dateFin") String dateFin,
-            @Param("sexe") String sexe,
-            @Param("situation") String situation,
-            @Param("assurance") String assurance,
-            @Param("ageMin") Integer ageMin,
-            @Param("ageMax") Integer ageMax
-    );
-
-    /**
-     * Comptage par assurance pour le récapitulatif (filtré client).
-     */
-    @Query(value = """
-            SELECT p.assurance, COUNT(p.id_patient)
-            FROM patient p
-            WHERE p.clientCreatorId = :clientId
-              AND (:dateDebut IS NULL OR DATE(p.date_creation) >= CAST(:dateDebut AS date))
-              AND (:dateFin   IS NULL OR DATE(p.date_creation) <= CAST(:dateFin   AS date))
-              AND (:sexe      IS NULL OR p.sexe      = :sexe)
-              AND (:situation IS NULL OR p.situation = :situation)
-              AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-              AND (:ageMin    IS NULL OR
-                   (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-              AND (:ageMax    IS NULL OR
-                   (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-            GROUP BY p.assurance
-            """, nativeQuery = true)
-    List<Object[]> countRapportByAssurance(
-            @Param("clientId") Long clientId,
-            @Param("dateDebut") String dateDebut,
-            @Param("dateFin") String dateFin,
-            @Param("sexe") String sexe,
-            @Param("situation") String situation,
-            @Param("assurance") String assurance,
-            @Param("ageMin") Integer ageMin,
-            @Param("ageMax") Integer ageMax
-    );
 
     @Query(value = """
             SELECT
@@ -308,34 +231,30 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             @Param("ageMin") Integer ageMin,
             @Param("ageMax") Integer ageMax);
 
-
     @Query(value = """
-                SELECT p.* FROM patient p
-                INNER JOIN consultation c ON c.patient_id = p.id_patient
-                WHERE p.client_creator_id = :clientId
-                  AND (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-                  AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
-                  AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
-                  AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
-                  AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
-                  AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-                  AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-                GROUP BY p.id_patient
-                order by p.nom,p.prenom ASC
-            """,
+            SELECT p.* FROM patient p
+            WHERE p.client_creator_id = :clientId
+              AND (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+              AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+              AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
+              AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
+              AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
+              AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
+              AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
+            ORDER BY p.nom, p.prenom ASC
+        """,
             countQuery = """
-                        SELECT COUNT(DISTINCT p.id_patient) 
-                        FROM patient p
-                        INNER JOIN consultation c ON c.patient_id = p.id_patient
-                        WHERE p.client_creator_id = :clientId
-                          AND (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-                          AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
-                          AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
-                          AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
-                          AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
-                          AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-                          AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-                    """, nativeQuery = true)
+                    SELECT COUNT(p.id_patient) 
+                    FROM patient p
+                    WHERE p.client_creator_id = :clientId
+                      AND (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+                      AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+                      AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
+                      AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
+                      AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
+                      AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
+                      AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
+                """, nativeQuery = true)
     List<Patient> findRapportForExportByClient(
             @Param("clientId") Long clientId,
             @Param("dateDebut") String dateDebut,
@@ -347,30 +266,27 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             @Param("ageMax") Integer ageMax);
 
     @Query(value = """
-                SELECT p.* FROM patient p
-                INNER JOIN consultation c ON c.patient_id = p.id_patient
-                WHERE (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-                  AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
-                  AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
-                  AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
-                  AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
-                  AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-                  AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-                GROUP BY p.id_patient
-                order by p.nom,p.prenom ASC
-            """,
+            SELECT p.* FROM patient p
+            WHERE (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+              AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+              AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
+              AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
+              AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
+              AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
+              AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
+            ORDER BY p.nom, p.prenom ASC
+        """,
             countQuery = """
-                        SELECT COUNT(DISTINCT p.id_patient) 
-                        FROM patient p
-                        INNER JOIN consultation c ON c.patient_id = p.id_patient
-                        WHERE (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-                          AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
-                          AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
-                          AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
-                          AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
-                          AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
-                          AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
-                    """, nativeQuery = true)
+                    SELECT COUNT(p.id_patient) 
+                    FROM patient p
+                    WHERE (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+                      AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+                      AND (CAST(:sexe AS text) IS NULL OR p.sexe = CAST(:sexe AS text))
+                      AND (CAST(:situation AS text) IS NULL OR p.situation = CAST(:situation AS text))
+                      AND (CAST(:assurance AS text) IS NULL OR p.assurance = CAST(:assurance AS boolean))
+                      AND (CAST(:ageMin AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= CAST(:ageMin AS integer))
+                      AND (CAST(:ageMax AS integer) IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= CAST(:ageMax AS integer))
+                """, nativeQuery = true)
     List<Patient> findRapportAllForExport(
             @Param("dateDebut") String dateDebut,
             @Param("dateFin") String dateFin,
@@ -381,40 +297,15 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             @Param("ageMax") Integer ageMax);
 
     @Query(value = """
-        SELECT 
-            COUNT(p.id_patient) as total,
-            SUM(CASE WHEN p.sexe = 'Masculin' THEN 1 ELSE 0 END) as masculin,
-            SUM(CASE WHEN p.sexe = 'Féminin' THEN 1 ELSE 0 END) as feminin,
-            SUM(CASE WHEN p.assurance = true THEN 1 ELSE 0 END) as assures,
-            SUM(CASE WHEN p.assurance = false THEN 1 ELSE 0 END) as nonAssures
-        FROM (
-            SELECT DISTINCT p.id_patient, p.sexe, p.assurance
-            FROM patient p
-            INNER JOIN consultation c ON p.id_patient = c.patient_id
-            WHERE (:clientId IS NULL OR p.client_creator_id= :clientId)
-              AND (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-              AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
-              AND (:sexe IS NULL OR p.sexe = :sexe)
-              AND (:situation IS NULL OR p.situation = :situation)
-              AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
-              AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
-              AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
-        ) as p
-        """, nativeQuery = true)
-    RapportSummaryProjection getStatsByClient(Long clientId, String dateDebut, String dateFin, String sexe,
-                                              String situation, String assurance, Integer ageMin, Integer ageMax);
-
-    @Query(value = """
     SELECT 
-        COUNT(DISTINCT p.id_patient) as total,
-        COUNT(DISTINCT CASE WHEN p.sexe = 'Masculin' THEN p.id_patient END) as masculin,
-        COUNT(DISTINCT CASE WHEN p.sexe = 'Féminin' THEN p.id_patient END) as feminin,
-        COUNT(DISTINCT CASE WHEN p.assurance = true THEN p.id_patient END) as assures,
-        COUNT(DISTINCT CASE WHEN p.assurance = false THEN p.id_patient END) as nonAssures
+        COUNT(p.id_patient) as total,
+        SUM(CASE WHEN p.sexe = 'Masculin' THEN 1 ELSE 0 END) as masculin,
+        SUM(CASE WHEN p.sexe = 'Féminin' THEN 1 ELSE 0 END) as feminin,
+        SUM(CASE WHEN p.assurance = true THEN 1 ELSE 0 END) as assures,
+        SUM(CASE WHEN p.assurance = false THEN 1 ELSE 0 END) as nonAssures
     FROM patient p
-    INNER JOIN consultation c ON p.id_patient = c.patient_id
-    WHERE (:dateDebut IS NULL OR c.date_consultation >= CAST(:dateDebut AS date))
-      AND (:dateFin IS NULL OR c.date_consultation <= CAST(:dateFin AS date))
+    WHERE (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+      AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
       AND (:sexe IS NULL OR p.sexe = :sexe)
       AND (:situation IS NULL OR p.situation = :situation)
       AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
@@ -424,7 +315,25 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     List<Object[]> getStats(String dateDebut, String dateFin, String sexe,
                             String situation, String assurance, Integer ageMin, Integer ageMax);
 
-
+    @Query(value = """
+    SELECT 
+        COUNT(p.id_patient) as total,
+        SUM(CASE WHEN p.sexe = 'Masculin' THEN 1 ELSE 0 END) as masculin,
+        SUM(CASE WHEN p.sexe = 'Féminin' THEN 1 ELSE 0 END) as feminin,
+        SUM(CASE WHEN p.assurance = true THEN 1 ELSE 0 END) as assures,
+        SUM(CASE WHEN p.assurance = false THEN 1 ELSE 0 END) as nonAssures
+    FROM patient p
+    WHERE (:clientId IS NULL OR p.client_creator_id = :clientId)
+      AND (:dateDebut IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) >= CAST(:dateDebut AS timestamp))
+      AND (:dateFin IS NULL OR GREATEST(p.date_creation, COALESCE(p.date_modification, p.date_creation)) <= CAST(:dateFin AS timestamp))
+      AND (:sexe IS NULL OR p.sexe = :sexe)
+      AND (:situation IS NULL OR p.situation = :situation)
+      AND (:assurance IS NULL OR p.assurance = CAST(:assurance AS boolean))
+      AND (:ageMin IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) >= :ageMin)
+      AND (:ageMax IS NULL OR (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p.date_naissance)) <= :ageMax)
+    """, nativeQuery = true)
+    RapportSummaryProjection getStatsByClient(Long clientId, String dateDebut, String dateFin, String sexe,
+                                              String situation, String assurance, Integer ageMin, Integer ageMax);
     // Admin Dash
 
     long countByClient_IdClientNot(Long id);

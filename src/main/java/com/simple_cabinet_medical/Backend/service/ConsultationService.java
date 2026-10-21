@@ -1,11 +1,11 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryPatientsDTO;
-import com.simple_cabinet_medical.Backend.Dto.RapportSummaryProjection;
-import com.simple_cabinet_medical.Backend.Dto.files.NewFileMeta;
-import com.simple_cabinet_medical.Backend.Dto.files.UpdateFilesResponse;
-import com.simple_cabinet_medical.Backend.Dto.files.UploadUrlEntry;
+import com.simple_cabinet_medical.Backend.dto.DiagnosticDTO;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryPatientsDTO;
+import com.simple_cabinet_medical.Backend.dto.RapportSummaryProjection;
+import com.simple_cabinet_medical.Backend.dto.files.NewFileMeta;
+import com.simple_cabinet_medical.Backend.dto.files.UpdateFilesResponse;
+import com.simple_cabinet_medical.Backend.dto.files.UploadUrlEntry;
 import com.simple_cabinet_medical.Backend.Permission.UtilisateurPermision;
 import com.simple_cabinet_medical.Backend.model.Consultation;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;

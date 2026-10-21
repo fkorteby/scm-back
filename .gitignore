@@ -1,5 +1,7 @@
 HELP.md
 target/
+key.json
+secrets/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -34,3 +36,4 @@ build/
 
 
 ./uploads
+./secrets

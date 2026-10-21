@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.Mapper.Client;
 
-import com.simple_cabinet_medical.Backend.Dto.ClientDto;
+import com.simple_cabinet_medical.Backend.dto.ClientDto;
 import com.simple_cabinet_medical.Backend.model.Client;
 import org.springframework.stereotype.Component;
 

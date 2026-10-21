@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.dto.UtilisateurDto;
 import com.simple_cabinet_medical.Backend.Mapper.Utilisateur.UtilisateurMapper;
 import com.simple_cabinet_medical.Backend.exception.InvalidCredentialsException;
 import com.simple_cabinet_medical.Backend.model.*;
@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,7 +87,7 @@ public class AuthenticationService {
             user.setClient(clientRepository.findById(input.getIdClient()).orElseThrow());
         }
         if (input.getRole().equals(EROLE.ADMIN)) {
-            user.setClient(null);
+            user.setClient(clientRepository.findById(1L).orElseThrow());
         }
         Utilisateur utilisateur = utilisateurRepository.save(user);
         this.emailService.sendUserAccessGrantedEmail(utilisateur.getEmail(), utilisateur, password);

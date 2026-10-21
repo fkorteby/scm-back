@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service.notification;
 
-import com.simple_cabinet_medical.Backend.Dto.notifications.UserNotificationResponseDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.UserNotificationResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller.notification;
 
-import com.simple_cabinet_medical.Backend.Dto.notifications.UserNotificationResponseDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.UserNotificationResponseDto;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.service.notification.UserNotificationService;
 import lombok.RequiredArgsConstructor;

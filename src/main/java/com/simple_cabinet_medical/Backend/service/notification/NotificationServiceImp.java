@@ -1,9 +1,9 @@
 package com.simple_cabinet_medical.Backend.service.notification;
 
-import com.simple_cabinet_medical.Backend.Dto.notifications.NotificationRequestDto;
-import com.simple_cabinet_medical.Backend.Dto.notifications.NotificationResponseDto;
-import com.simple_cabinet_medical.Backend.Dto.notifications.NotificationUpdateRequestDto;
-import com.simple_cabinet_medical.Backend.Dto.notifications.NotificationUserResponseDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.NotificationRequestDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.NotificationResponseDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.NotificationUpdateRequestDto;
+import com.simple_cabinet_medical.Backend.dto.notifications.NotificationUserResponseDto;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.model.notifications.ENotificationType;
 import com.simple_cabinet_medical.Backend.model.notifications.Notification;

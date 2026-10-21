@@ -1,8 +1,7 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.Dash.*;
+import com.simple_cabinet_medical.Backend.dto.Dash.*;
 import com.simple_cabinet_medical.Backend.service.StatistiqueService;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.Pub.CompagnePubRequestDto;
+import com.simple_cabinet_medical.Backend.dto.Pub.CompagnePubRequestDto;
 import com.simple_cabinet_medical.Backend.model.*;
 import com.simple_cabinet_medical.Backend.repository.*;
 import org.slf4j.Logger;

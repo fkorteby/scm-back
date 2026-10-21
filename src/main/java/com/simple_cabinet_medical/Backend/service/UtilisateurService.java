@@ -1,7 +1,7 @@
 package com.simple_cabinet_medical.Backend.service;
 
-import com.simple_cabinet_medical.Backend.Dto.ChatUserDto;
-import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.dto.ChatUserDto;
+import com.simple_cabinet_medical.Backend.dto.UtilisateurDto;
 import com.simple_cabinet_medical.Backend.Mapper.Utilisateur.UtilisateurMapper;
 import com.simple_cabinet_medical.Backend.model.EStatus;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;

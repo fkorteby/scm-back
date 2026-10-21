@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.Dash.RepartitionSexeDTO;
+import com.simple_cabinet_medical.Backend.dto.Dash.RepartitionSexeDTO;
 import com.simple_cabinet_medical.Backend.repository.ConsultationRepository;
 import com.simple_cabinet_medical.Backend.repository.PatientRepository;
 import com.simple_cabinet_medical.Backend.repository.RendezVousRepository;

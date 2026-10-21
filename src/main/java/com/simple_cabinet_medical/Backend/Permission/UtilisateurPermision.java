@@ -1,6 +1,5 @@
 package com.simple_cabinet_medical.Backend.Permission;
 
-import com.simple_cabinet_medical.Backend.Dto.DiagnosticDTO;
 import com.simple_cabinet_medical.Backend.model.EROLE;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;

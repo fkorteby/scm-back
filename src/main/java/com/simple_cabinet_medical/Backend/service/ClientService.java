@@ -1,8 +1,9 @@
 package com.simple_cabinet_medical.Backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.simple_cabinet_medical.Backend.Dto.ClientDto;
-import com.simple_cabinet_medical.Backend.Dto.ClientRegister;
+import com.simple_cabinet_medical.Backend.dto.ClientDto;
+import com.simple_cabinet_medical.Backend.dto.ClientRegister;
+import com.simple_cabinet_medical.Backend.dto.client.ClientResponse;
 import com.simple_cabinet_medical.Backend.Mapper.Client.ClientMapper;
 import com.simple_cabinet_medical.Backend.exception.CustomBadRequestException;
 import com.simple_cabinet_medical.Backend.model.*;
@@ -10,7 +11,10 @@ import com.simple_cabinet_medical.Backend.repository.ClientConfigRepository;
 import com.simple_cabinet_medical.Backend.repository.ClientRepository;
 import com.simple_cabinet_medical.Backend.repository.LocalRepository;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -120,7 +124,7 @@ public class ClientService {
                     client.getNomClient(),
                     extension
             );
-            String path = baseUrl + '/' + '/' + fileName;
+            String path = baseUrl + '/' + fileName;
             ClientConfig config = buildDefaultClientConfig(client,clientReq,path);
             config.setClient(client);
 
@@ -177,10 +181,20 @@ public class ClientService {
         return clientMapper.EntityToDto(updatedClient);
     }
 
-    @Transactional
-    public void deleteClient(Long clientId){
-        clientRepository.deleteById(clientId);
+    public void deleteClient(Long clientId) {
         gcsService.deleteAllFilesByClient(clientId);
+        deleteClientFromDatabase(clientId);
+    }
+
+    @Transactional
+    public void deleteClientFromDatabase(Long clientId) {
+        if (!clientRepository.existsById(clientId)) {
+            throw new EntityNotFoundException(
+                    "Client introuvable : " + clientId
+            );
+        }
+
+        clientRepository.deleteById(clientId);
     }
 
     private Local buildDefaultLocal(Client client, ClientRegister clientReq) {
@@ -326,5 +340,31 @@ public class ClientService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public Page<ClientResponse> findAllClient(Pageable pageable) {
+
+        Page<Client> clients = clientRepository.findAll(pageable);
+
+        return clients.map(client -> new ClientResponse(
+                client.getIdClient(),
+                client.getNomClient(),
+                client.getNomClientEnArabe(),
+                client.getEmail(),
+                client.getContact(),
+                client.getAdresse(),
+                client.getVille(),
+                client.getCodePostal(),
+                client.getPays(),
+                client.getRue(),
+                client.getMobile(),
+                client.getSite(),
+                client.getDescription(),
+                client.getImage(),
+                client.getStatus(),
+                client.getSpecialite(),
+                client.getEmailVerificationStatus(),
+                client.getDateCreation()
+        ));
     }
 }

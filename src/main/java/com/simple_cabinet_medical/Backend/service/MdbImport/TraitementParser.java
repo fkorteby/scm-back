@@ -5,20 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Parse le champ traitement brut de l'ancienne BDD (format texte libre)
- * Exemple d'entrée :
- *   AMLOR[5MG] gel     (QSP 1 mois
- *   1 gél/jr.
- *
- *   LOPRIL[50MG] cp.     (QSP 1 mois
- *   1 cp./jr.
- */
 public class TraitementParser {
 
-    /**
-     * Résultat du parsing d'un seul médicament dans le champ traitement
-     */
     public static class ParsedTraitement {
         public String nomCommerciale;   // ex: "AMLOR"
         public String dosage;           // ex: "5MG"

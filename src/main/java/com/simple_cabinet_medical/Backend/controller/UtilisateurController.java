@@ -1,7 +1,7 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.ChatUserDto;
-import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.dto.ChatUserDto;
+import com.simple_cabinet_medical.Backend.dto.UtilisateurDto;
 import com.simple_cabinet_medical.Backend.model.Utilisateur;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
 import com.simple_cabinet_medical.Backend.service.UtilisateurService;
@@ -74,4 +74,5 @@ public class UtilisateurController {
 
         return ResponseEntity.ok(chatUserDto);
     }
+
 }

@@ -1,6 +1,6 @@
 package com.simple_cabinet_medical.Backend.controller;
 
-import com.simple_cabinet_medical.Backend.Dto.UtilisateurDto;
+import com.simple_cabinet_medical.Backend.dto.UtilisateurDto;
 import com.simple_cabinet_medical.Backend.payload.request.LoginRequest;
 import com.simple_cabinet_medical.Backend.payload.request.RegisterUserRequest;
 import com.simple_cabinet_medical.Backend.payload.response.LoginResponse;

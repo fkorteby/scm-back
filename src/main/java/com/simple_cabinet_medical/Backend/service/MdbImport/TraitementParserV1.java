@@ -5,28 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Parser de traitements pour les fichiers MDB v1.0.
- *
- * Gère deux formats observés dans les données réelles :
- *
- * FORMAT A — tiret en début de ligne (id_cons=1) :
- *   - DOLIPRANE 1GR                   01 BTE / 1cp 3xjr.
- *   - RHINATIOL SIROP A               01 FL / 1 cas 3xjr.
- *   Règle : chaque ligne commençant par "- " est un médicament complet
- *           (nom [dosage] [forme] / posologie sur la même ligne).
- *
- * FORMAT B — alternance nom/posologie sans tiret (id_cons=2) :
- *   amlor 5mg
- *   1 gel./j
- *   lopril 50mg
- *   1 cp/j
- *   Règle : lignes impaires = "nom dosage", lignes paires = posologie.
- *
- * La détection du format est automatique : si le texte contient au moins
- * une ligne commençant par "- " (après trim), on applique FORMAT A,
- * sinon FORMAT B.
- */
 public class TraitementParserV1 {
 
     public static class ParsedTraitement {

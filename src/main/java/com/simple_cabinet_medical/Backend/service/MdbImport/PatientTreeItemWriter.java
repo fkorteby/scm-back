@@ -8,18 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Writer chunk-oriented : reçoit un lot de patients (taille = chunk-size du
- * step) et sauvegarde CHACUN indépendamment via
- * ImportRowPersister.savePatientTree(...) (transaction REQUIRES_NEW par
- * patient, déjà en place).
- *
- * IMPORTANT : ce bean est @StepScope, donc Spring injecte un PROXY CGLIB
- * partout où on le référence (y compris dans le listener). Un proxy CGLIB
- * n'intercepte que les APPELS DE MÉTHODE, jamais l'accès direct à un champ
- * public — d'où l'obligation d'exposer les compteurs via des getters, et de
- * ne JAMAIS accéder aux champs directement depuis l'extérieur de la classe.
- */
 public class PatientTreeItemWriter implements ItemWriter<PatientImportUnit> {
 
     private final ImportRowPersister rowPersister;
@@ -27,8 +15,8 @@ public class PatientTreeItemWriter implements ItemWriter<PatientImportUnit> {
     private final AtomicInteger patientsImported      = new AtomicInteger(0);
     private final AtomicInteger patientsFailed        = new AtomicInteger(0);
     private final AtomicInteger consultationsImported = new AtomicInteger(0);
-    private final AtomicInteger traitementsImported   = new AtomicInteger(0);
-    private final List<String>  errors                = new ArrayList<>();
+    private final AtomicInteger treatmentsImported     = new AtomicInteger(0);
+    private final List<String>  errors                 = new ArrayList<>();
 
     public PatientTreeItemWriter(ImportRowPersister rowPersister) {
         this.rowPersister = rowPersister;
@@ -43,25 +31,26 @@ public class PatientTreeItemWriter implements ItemWriter<PatientImportUnit> {
 
                 patientsImported.incrementAndGet();
                 consultationsImported.addAndGet(outcome.consultationsSaved());
-                traitementsImported.addAndGet(outcome.traitementsSaved());
+                treatmentsImported.addAndGet(outcome.treatmentsSaved());
+
 
             } catch (Exception e) {
                 patientsFailed.incrementAndGet();
                 synchronized (errors) {
                     errors.add("Patient num_mal=" + unit.numMal()
-                            + " ignoré (avec toutes ses consultations/traitements) : "
+                            + " skipped (along with all its consultations/treatments): "
                             + ImportErrorFormatter.describe(e));
                 }
             }
         }
     }
 
-    // ─── Getters (obligatoires : voir Javadoc de classe sur le proxy @StepScope) ─
+    // ─── Getters (mandatory: see class Javadoc about the @StepScope proxy) ──
 
     public int getPatientsImported()      { return patientsImported.get(); }
     public int getPatientsFailed()        { return patientsFailed.get(); }
     public int getConsultationsImported() { return consultationsImported.get(); }
-    public int getTraitementsImported()   { return traitementsImported.get(); }
+    public int getTreatmentsImported()    { return treatmentsImported.get(); }
 
     public List<String> getErrors() {
         synchronized (errors) {

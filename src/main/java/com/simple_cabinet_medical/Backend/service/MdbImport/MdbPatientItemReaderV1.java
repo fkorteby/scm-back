@@ -14,11 +14,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
-/**
- * Reader pour les fichiers MDB v1.0 — préchargement en Map (voir Javadoc de
- * MdbPatientItemReader v1.7 pour l'explication complète de pourquoi on a
- * abandonné le merge-join en flux au profit de ce préchargement).
- */
 public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUnit> {
 
     private final String filePath;
@@ -55,7 +50,7 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
             conn = DriverManager.getConnection(buildJdbcUrl());
 
             client = clientRepository.findById(clientId)
-                    .orElseThrow(() -> new IllegalStateException("Client non trouvé : id=" + clientId));
+                    .orElseThrow(() -> new IllegalStateException("Client not found: id=" + clientId));
 
             medicamentCache = new HashMap<>();
             for (Medicament m : medicamentRepository.findMedicamentsByClientCreatorId(1L)) {
@@ -69,7 +64,7 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
             patientCursor = new RowCursor<>(rsPatients, this::mapPatient);
 
         } catch (SQLException e) {
-            throw new ItemStreamException("Impossible d'ouvrir le fichier MDB v1.0 : " + e.getMessage(), e);
+            throw new ItemStreamException("Unable to open v1.0 MDB file: " + e.getMessage(), e);
         }
     }
 
@@ -104,7 +99,7 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
         List<RawConsultation> rawConsultations = consultationsByPatient.getOrDefault(rp.numMal(), Collections.emptyList());
 
         for (RawConsultation rc : rawConsultations) {
-            List<Traitement> traitements = new ArrayList<>();
+            List<Traitement> treatments = new ArrayList<>();
             for (TraitementParserV1.ParsedTraitement pt : TraitementParserV1.parse(rc.traitCons())) {
                 if (pt.nomCommerciale == null || pt.nomCommerciale.isBlank() || pt.nomCommerciale.length() < 2) {
                     continue;
@@ -113,11 +108,11 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
                 Traitement t = new Traitement();
                 t.setMedicament(med);
                 t.setDuree(pt.duree != null && !pt.duree.isBlank() ? pt.duree : null);
-                t.setPosologie(pt.posologie != null && !pt.posologie.isBlank() ? pt.posologie : "Non précisée");
+                t.setPosologie(pt.posologie != null && !pt.posologie.isBlank() ? pt.posologie : "Not specified");
                 t.setClientCreatorId(clientId);
-                traitements.add(t);
+                treatments.add(t);
             }
-            units.add(new ConsultationUnit(buildConsultation(rc), traitements));
+            units.add(new ConsultationUnit(buildConsultation(rc), treatments));
         }
 
         return new PatientImportUnit(rp.numMal(), patient, units);
@@ -207,11 +202,6 @@ public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUni
     }
 
     private String clean(String v) { return v == null ? null : v.trim(); }
-
-    private String firstNonBlank(String... vs) {
-        for (String v : vs) if (v != null && !v.isBlank()) return v.trim();
-        return "";
-    }
 
     private String normalizeSexe(String sexe) {
         if (sexe == null) return null;
