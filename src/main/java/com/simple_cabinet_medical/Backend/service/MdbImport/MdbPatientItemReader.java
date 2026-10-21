@@ -18,20 +18,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.*;
 
-/**
- * Reader for "v1.7" MDB files.
- *
- * <p>NOTE 1 (optional columns): some MDB files of this "version 1.7" do not
- * actually have every expected column (e.g. trait2_cons missing on some
- * client files). All optional columns are checked ONCE at open() time (not
- * per row, for performance) — a missing column simply means the field is
- * skipped, never a crash of the whole Job.
- *
- * <p>NOTE 2 (treatment source priority): trait_cons/trait2_cons is parsed
- * FIRST for a given consultation; if it yields at least one treatment, the
- * presc table is not consulted for that consultation. Only if trait_cons is
- * empty/unparsable do we fall back to presc.
- */
 public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit> {
 
     private static final Logger log = LoggerFactory.getLogger(MdbPatientItemReader.class);
@@ -169,28 +155,6 @@ public class MdbPatientItemReader implements ItemStreamReader<PatientImportUnit>
         return new PatientImportUnit(rp.numMal(), patient, units);
     }
 
-    /**
-     * Three-level logic, applied INDEPENDENTLY for each consultation (so a
-     * database mixing "old style" trait_cons and "new style" presc
-     * consultations is handled correctly, row by row — never a global choice
-     * for the whole file):
-     *
-     * <ol>
-     *   <li>Try to PARSE trait_cons/trait2_cons (structured format
-     *       "NAME[DOSAGE] form (duration" + dosage instructions on the next
-     *       line). If it yields at least one treatment -> done for this
-     *       consultation.</li>
-     *   <li>Otherwise, look at the presc table for this consultation
-     *       (num_cons). If it has rows -> done.</li>
-     *   <li>Otherwise, if trait_cons still contained text (but FREE text,
-     *       hand-typed, not matching the structured format — e.g.
-     *       "ANTAG 20 +SORBITOL AMP+LIBRAX 1 COM /J+ METEOXANE") -> it is NOT
-     *       parsed as a structured drug (too risky), it is stored AS-IS on
-     *       the consultation's free-text field so nothing is lost. No
-     *       structured Traitement is created in this case (no drug can be
-     *       reliably attached).</li>
-     * </ol>
-     */
     private List<Traitement> resolveTreatments(RawConsultation rc, Consultation c) {
         List<Traitement> treatments = new ArrayList<>();
 

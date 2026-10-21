@@ -8,23 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Chunk-oriented writer: receives a batch of patients (size = the step's
- * chunk size) and saves EACH one independently via
- * {@link ImportRowPersister#savePatientTree}, which already runs in its own
- * REQUIRES_NEW transaction per patient.
- *
- * <p>IMPORTANT: this bean is {@code @StepScope}, so Spring injects a CGLIB
- * PROXY everywhere it is referenced (including in the listener). A CGLIB
- * proxy only intercepts METHOD CALLS, never direct field access — hence the
- * counters are exposed only through getters, never accessed as raw fields
- * from outside this class.
- *
- * <p>Thread-safety: with the step's {@code TaskExecutor} enabled (see
- * {@link MdbImportJobConfig}), {@code write(...)} can be called concurrently
- * for different chunks. All counters use {@link AtomicInteger} and the error
- * list is synchronized accordingly.
- */
 public class PatientTreeItemWriter implements ItemWriter<PatientImportUnit> {
 
     private final ImportRowPersister rowPersister;

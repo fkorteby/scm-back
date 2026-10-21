@@ -75,14 +75,14 @@ public class Client {
     @RestResource(exported = false)
     private Set<Utilisateur> utilisateurs;
 
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "client_id")
-//    @RestResource(exported = false)
-//    private Set<Patient> patients;
-//
-//    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @RestResource(exported = false)
-//    private Set<Consultation> consultations;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    @RestResource(exported = false)
+    private Set<Patient> patients;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @RestResource(exported = false)
+    private Set<Consultation> consultations;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "client_config_id", referencedColumnName = "idClientConfig")

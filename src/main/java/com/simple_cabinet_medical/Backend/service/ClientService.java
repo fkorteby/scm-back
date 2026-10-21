@@ -11,6 +11,7 @@ import com.simple_cabinet_medical.Backend.repository.ClientConfigRepository;
 import com.simple_cabinet_medical.Backend.repository.ClientRepository;
 import com.simple_cabinet_medical.Backend.repository.LocalRepository;
 import com.simple_cabinet_medical.Backend.repository.UtilisateurRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -180,10 +181,20 @@ public class ClientService {
         return clientMapper.EntityToDto(updatedClient);
     }
 
-    @Transactional
-    public void deleteClient(Long clientId){
-        clientRepository.deleteById(clientId);
+    public void deleteClient(Long clientId) {
         gcsService.deleteAllFilesByClient(clientId);
+        deleteClientFromDatabase(clientId);
+    }
+
+    @Transactional
+    public void deleteClientFromDatabase(Long clientId) {
+        if (!clientRepository.existsById(clientId)) {
+            throw new EntityNotFoundException(
+                    "Client introuvable : " + clientId
+            );
+        }
+
+        clientRepository.deleteById(clientId);
     }
 
     private Local buildDefaultLocal(Client client, ClientRegister clientReq) {
@@ -352,7 +363,8 @@ public class ClientService {
                 client.getImage(),
                 client.getStatus(),
                 client.getSpecialite(),
-                client.getEmailVerificationStatus()
+                client.getEmailVerificationStatus(),
+                client.getDateCreation()
         ));
     }
 }

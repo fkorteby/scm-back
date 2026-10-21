@@ -15,36 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Persists a patient's whole "tree" — the patient itself, all of its
- * consultations, and all treatments of those consultations — in ONE single
- * transaction (REQUIRES_NEW).
- *
- * <p>Why one transaction per patient (and not per row, nor one global
- * transaction for the whole import):
- * <ul>
- *   <li>One single global transaction: a single failing row, out of
- *       potentially millions, rolls back the entire import. Unacceptable.</li>
- *   <li>One transaction per row (patient, then each consultation, then each
- *       treatment separately): correct but far too many commits on a large
- *       database (millions of transactions) — very slow.</li>
- *   <li>One transaction per PATIENT (this class): good compromise. If a
- *       patient hits a real DB constraint issue at flush time, only THAT
- *       patient and its subtree (consultations + treatments) is lost, while
- *       every other patient keeps importing normally.</li>
- * </ul>
- *
- * <p><b>Performance note (see SPRING_BATCH_GUIDE.md §4.1):</b> consultations
- * are now saved with a single {@code saveAll(...) + flush()} for the whole
- * patient, instead of one {@code saveAndFlush} per consultation. Flushing
- * once lets Hibernate group the INSERT statements into a real JDBC batch
- * (governed by {@code hibernate.jdbc.batch_size}) rather than sending one
- * round trip per consultation. This only works if the entity's
- * {@code @GeneratedValue} strategy is NOT {@code IDENTITY} — check
- * {@code Patient}/{@code Consultation}/{@code Traitement} use
- * {@code GenerationType.SEQUENCE} instead, otherwise Hibernate silently
- * disables batching regardless of this change.
- */
 @Service
 public class ImportRowPersister {
 

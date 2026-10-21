@@ -7,17 +7,6 @@ import org.springframework.batch.item.ExecutionContext;
 
 import java.util.ArrayList;
 
-/**
- * At the end of the step, copies the counters and error messages
- * accumulated by the writer bean ({@code @StepScope}) into the
- * StepExecution's ExecutionContext — which the controller reads back after
- * {@code jobLauncher.run(...)}.
- *
- * <p>IMPORTANT: always go through {@link PatientTreeItemWriter}'s getters
- * (never through its fields directly) — see that class's Javadoc: the
- * writer injected here is a {@code @StepScope} proxy, and direct field
- * access bypasses the proxy (guaranteed NullPointerException).
- */
 public class ImportResultStepListener implements StepExecutionListener {
 
     private final PatientTreeItemWriter writer;

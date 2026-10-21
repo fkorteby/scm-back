@@ -31,8 +31,9 @@ public class Patient extends BasedObject implements Serializable {
 
     private String sexe;
 
+    @Column(columnDefinition = "TEXT")
     private String adresse;
-
+   
     private String profession;
 
     private Boolean assurance;

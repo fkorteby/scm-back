@@ -3,6 +3,8 @@ package com.simple_cabinet_medical.Backend.dto.client;
 import com.simple_cabinet_medical.Backend.model.EStatus;
 import com.simple_cabinet_medical.Backend.model.EmailVerificationStatus;
 
+import java.util.Date;
+
 public record ClientResponse(
         Long idClient,
         String nomClient,
@@ -20,6 +22,7 @@ public record ClientResponse(
         String image,
         EStatus status,
         String specialite,
-        EmailVerificationStatus emailVerificationStatus
+        EmailVerificationStatus emailVerificationStatus,
+        Date createdAt
 ) {
 }

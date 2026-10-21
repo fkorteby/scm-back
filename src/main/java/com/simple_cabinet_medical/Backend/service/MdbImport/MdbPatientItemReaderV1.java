@@ -14,11 +14,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
-/**
- * Reader for "v1.0" MDB files — preloaded into Maps (see the Javadoc of
- * {@link MdbPatientItemReader} for the full explanation of why the
- * streaming merge-join approach was dropped in favor of this preload).
- */
 public class MdbPatientItemReaderV1 implements ItemStreamReader<PatientImportUnit> {
 
     private final String filePath;

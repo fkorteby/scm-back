@@ -7,12 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Deletes the temporary .mdb file once the Job has REALLY finished (success
- * or failure). Necessary now that the Job runs asynchronously: the file can
- * no longer be deleted right after launching the Job in the controller (as
- * before), since the Job is still reading it at that point in time.
- */
 public class TempFileCleanupListener implements JobExecutionListener {
 
     @Override
